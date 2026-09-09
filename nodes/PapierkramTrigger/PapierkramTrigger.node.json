@@ -1,0 +1,18 @@
+{
+  "node": "n8n-nodes-base.papierkramTrigger",
+  "nodeVersion": "1.0",
+  "codexVersion": "1.0",
+  "categories": ["Finance & Accounting", "Productivity"],
+  "resources": {
+    "credentialDocumentation": [
+      {
+        "url": "https://hilfe.papierkram.de/api/"
+      }
+    ],
+    "primaryDocumentation": [
+      {
+        "url": "https://hilfe.papierkram.de/api/"
+      }
+    ]
+  }
+}

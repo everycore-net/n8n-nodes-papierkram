@@ -1,0 +1,47 @@
+# Publishing to npm with a provenance statement.
+#
+# n8n requires community nodes to be published through GitHub Actions with
+# provenance since 1 May 2026; without it the package cannot be verified.
+# Provenance needs "id-token: write" and a public repository, so this repository
+# has to live on GitHub and be public for a release to work.
+#
+# Set NPM_TOKEN (automation token) as a repository secret before the first run.
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+
+      - name: Install
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Build
+        run: npm run build
+
+      - name: Check against the community package rules
+        run: npx @n8n/scan-community-package n8n-nodes-papierkram
+
+      - name: Publish
+        run: npm publish --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
