@@ -64,11 +64,17 @@ export class PapierkramApi implements ICredentialType {
 	 * /info is the cheapest endpoint and needs no permissions of its own, so a
 	 * failure here means the account name or the token is wrong rather than that
 	 * one resource is out of reach.
+	 *
+	 * The Accept header is not decoration: without it Papierkram answers 406 Not
+	 * Acceptable, and the credential dialog then reports a working token as
+	 * broken. The node itself sends the header through requestDefaults, so this
+	 * only ever showed up in the test.
 	 */
 	test: ICredentialTestRequest = {
 		request: {
 			baseURL: '=https://{{$credentials.subdomain}}.papierkram.de/api/v1',
 			url: '/info',
+			headers: { Accept: 'application/json' },
 		},
 	};
 }
