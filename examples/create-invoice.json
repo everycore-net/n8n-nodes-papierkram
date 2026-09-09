@@ -6,7 +6,7 @@
         "path": "papierkram-invoice",
         "httpMethod": "POST",
         "responseMode": "lastNode",
-        "responseData": "allEntries"
+        "responseData": "firstEntryBinary"
       },
       "id": "3f7a1b10-0001-4000-8000-000000000001",
       "name": "Webhook",
@@ -22,12 +22,12 @@
       "parameters": {
         "resource": "invoice",
         "operation": "create",
-        "name": "={{ $json.subject }}",
-        "lineItems": "={{ JSON.stringify($json.positions) }}",
+        "name": "={{ $json.body.subject }}",
+        "lineItems": "={{ JSON.stringify($json.body.positions) }}",
         "additionalFields": {
-          "customerId": "={{ $json.customerId }}",
+          "customerId": "={{ $json.body.customerId }}",
           "documentDate": "={{ $now.format('yyyy-MM-dd') }}",
-          "paymentTermId": 1
+          "paymentTermId": "={{ $json.body.paymentTermId }}"
         }
       },
       "id": "3f7a1b10-0001-4000-8000-000000000002",
@@ -56,8 +56,8 @@
     },
     {
       "parameters": {
-        "content": "## Create an invoice\n\nThe webhook expects:\n\n```json\n{\n  \"subject\": \"Consulting, September\",\n  \"customerId\": 6,\n  \"positions\": [\n    { \"name\": \"Consulting\", \"quantity\": 8, \"unit\": \"Stunde\", \"price\": 120, \"vat_rate\": \"19%\" }\n  ]\n}\n```\n\n**vat_rate is not a percentage.** It is the name of a tax rate as configured in the account, spelled exactly as Papierkram spells it — `19%`, or `0% Ohne USt (Kleinunternehmer)` for a small business. No endpoint lists the valid names; the easiest source is an existing invoice.\n\n**Document Date is required**, although the API documentation marks it optional.\n\nThe invoice is created as a draft and has no number yet. To send it, append *Invoice → Deliver*.",
-        "height": 460,
+        "content": "## Create an invoice\n\nThe webhook expects:\n\n```json\n{\n  \"subject\": \"Consulting, September\",\n  \"customerId\": 6,\n  \"paymentTermId\": 3,\n  \"positions\": [\n    { \"name\": \"Consulting\", \"quantity\": 8, \"unit\": \"Stunde\", \"price\": 120, \"vat_rate\": \"19%\" }\n  ]\n}\n```\n\nBoth IDs are account-specific. Run *Company → Get Many* and *Payment Term → Get Many* once to find them; there is nothing to guess and nothing that defaults sensibly.\n\n**vat_rate is not a percentage.** It is the name of a tax rate as configured in the account, spelled exactly as Papierkram spells it — `19%`, or `0% Ohne USt (Kleinunternehmer)` for a small business. No endpoint lists the valid names; the easiest source is an existing invoice.\n\n**Document Date is required**, although the API documentation marks it optional.\n\nThe invoice is created as a draft and has no number yet. To send it, append *Invoice → Deliver*.\n\n### Where the payload lives\n\nThe Webhook node does not hand on the JSON body as the item — it wraps it. The item is `headers`, `params`, `query`, `body`, `webhookUrl`, `executionMode`, so every field above is read as `$json.body.…`. Reading `$json.subject` yields nothing, the API is called with empty fields, and the error you get back is about the invoice rather than about the expression.\n\n### Calling it\n\nWhile the workflow is open in the editor, *Execute workflow* listens on `/webhook-test/papierkram-invoice`. Once the workflow is active, the address is `/webhook/papierkram-invoice`.\n\nThe response is the **PDF itself**: the last node produces binary data and the webhook is set to *First Entry Binary*. Left on the default the caller would receive that PDF as a JSON array of byte values, which looks like a bug and is merely a setting.",
+        "height": 640,
         "width": 420
       },
       "id": "3f7a1b10-0001-4000-8000-000000000004",
