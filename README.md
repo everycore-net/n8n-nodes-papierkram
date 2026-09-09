@@ -95,6 +95,10 @@ this node:
 - **`updated_at` is missing on invoices, estimates and vouchers**, so changes to those cannot be
   detected at all — see the trigger table above.
 - `page_size` is silently clamped to 100.
+- **`vat_rate` on a position is a name, not a number** — the tax rate as the account has it
+  configured, for example `"19%"` or `"0% Ohne USt (Kleinunternehmer)"`, and `"Keine Vorsteuer"` on
+  vouchers. Nothing lists the valid names; read one off an existing record. `19` answers 422.
+- `document_date` is required for an invoice even though the specification marks it optional.
 - Filters are per endpoint and limited — mostly company, project and a date range. There is no
   full-text search.
 

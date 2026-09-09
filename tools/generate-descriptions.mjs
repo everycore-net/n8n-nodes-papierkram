@@ -299,7 +299,9 @@ function propertyFor(leaf) {
 	const { dotted, schema } = leaf;
 	const name = camel(dotted.replace(/\./g, '_'));
 	const displayName = title(dotted);
-	const description = describe(schema.description);
+	const note = FIELD_NOTES[dotted];
+	const spec = clean(schema.description);
+	const description = describe(note === undefined ? spec : spec === '' ? note : `${spec}. ${note}`);
 	const enumValues = [...new Set((schema.enum ?? []).filter((v) => v !== null && v !== ''))];
 
 	if (enumValues.length > 0) {
@@ -355,6 +357,20 @@ function propertyFor(leaf) {
 	}
 	return { name, displayName, type: 'string', default: '', description, send: dotted };
 }
+
+/**
+ * What the spec does not say and an account taught us. Keyed by the dotted
+ * field path, appended to whatever description the document carries.
+ *
+ * Both entries cost a 422 to find out, which is exactly the kind of thing a
+ * field hint is for.
+ */
+const FIELD_NOTES = {
+	document_date:
+		'Date of the document as YYYY-MM-DD. The API rejects an invoice without it ("Datum muss ausgefüllt werden") although the specification marks it optional',
+	line_items:
+		'Positions as a JSON array. "vat_rate" is not a percentage but the name of a tax rate as the account has it configured — "19%", "0% Ohne USt (Kleinunternehmer)", or "Keine Vorsteuer" on a voucher. Nothing lists the valid names, so read one off an existing record',
+};
 
 const byDisplayName = (a, b) => a.displayName.localeCompare(b.displayName);
 

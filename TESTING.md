@@ -73,9 +73,23 @@ leaves no gap in the numbering, but a test account is still the better target.
 PAPIERKRAM_ACCOUNT=meinefirma PAPIERKRAM_TOKEN=<token> node tools/live-write-check.mjs
 ```
 
-- [ ] Invoice: created, `billing.company` filled (the customer stuck), totals 100 / 19 / 119.
-- [ ] Voucher document: upload answers 2xx.
-- [ ] Cleanup: both read back as 404.
+Run on 9 September 2026, all three green:
+
+- [x] Invoice: created as a draft without a number, `billing.company` filled — `customer.id` is the
+      right nesting — and the line item arrived.
+- [x] Voucher document: upload answers **201** with `{type,id,uri}`, so the multipart body the node
+      builds is the one the server wants.
+- [x] Cleanup: both delete with 204 and read back as 404.
+
+Two things cost a 422 before that and are now field hints in the node:
+
+- `document_date` is **required in practice** for an invoice — without it the API answers
+  *"Datum muss ausgefüllt werden"* — although the specification lists only name, payment_term and
+  line_items as required.
+- `vat_rate` is **not a percentage**. It is the name of a tax rate as the account has it configured:
+  `"0% Ohne USt (Kleinunternehmer)"` on a Kleinunternehmer account, `"Keine Vorsteuer"` on the
+  voucher side. Sending `19` answers *"Steuer muss ausgewählt werden"*. No endpoint lists the valid
+  names, so the check reads one off an existing record — which is what a workflow has to do too.
 
 Passing the script is necessary but not sufficient for the node — it proves the API accepts the
 shapes, while the node still has to produce them through the declarative routing. Section 1 is where

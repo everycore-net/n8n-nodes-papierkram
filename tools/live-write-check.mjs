@@ -43,6 +43,21 @@ const call = async (method, path, body) => {
 const report = (label, result) =>
 	console.log(`   ! ${label}: HTTP ${result.status} ${result.body?.message ?? ''}`);
 
+/**
+ * vat_rate is not a percentage. The API takes the *name* of a tax rate as the
+ * account has it configured — "0% Ohne USt (Kleinunternehmer)" on a
+ * Kleinunternehmer account, "19%" elsewhere — and nothing lists the valid
+ * names, so the only reliable source is a record that already exists.
+ */
+const vatRateFrom = async (listPath, itemPath) => {
+	const list = await call('GET', `${listPath}?page=1&page_size=1`);
+	const id = list.body?.entries?.[0]?.id;
+	if (id === undefined) return undefined;
+	const one = await call('GET', itemPath + id);
+	const item = one.body?.line_items?.[0];
+	return item === undefined ? undefined : { vatRate: item.vat_rate, category: item.category };
+};
+
 const created = { invoice: null, voucher: null };
 
 try {
@@ -51,15 +66,22 @@ try {
 	const paymentTermId = terms.body?.entries?.[0]?.id;
 	const companies = await call('GET', '/contact/companies?page=1&page_size=50');
 	const customer = (companies.body?.entries ?? []).find((entry) => entry.contact_type === 'customer');
+	const invoiceSample = await vatRateFrom('/income/invoices', '/income/invoices/');
+	const voucherSample = await vatRateFrom('/expense/vouchers', '/expense/vouchers/');
 	console.log(`   payment term ${paymentTermId ?? 'none'}, customer ${customer?.id ?? 'none'}`);
+	console.log(`   tax rate for invoices: ${JSON.stringify(invoiceSample?.vatRate)}`);
+	console.log(`   tax rate for vouchers: ${JSON.stringify(voucherSample?.vatRate)}, category ${JSON.stringify(voucherSample?.category)}`);
 
 	console.log('--- invoice with a nested customer and a line item');
 	const invoice = await call('POST', '/income/invoices', {
 		name: 'API-Test n8n-nodes-papierkram',
 		description: 'Automatischer Test, wird sofort wieder geloescht',
+		document_date: new Date().toISOString().slice(0, 10),
 		payment_term: { id: paymentTermId },
 		customer: { id: customer?.id },
-		line_items: [{ name: 'Beratung', quantity: 1, unit: 'Stunde', price: 100, vat_rate: 19 }],
+		line_items: [
+			{ name: 'Beratung', quantity: 1, unit: 'Stunde', price: 100, vat_rate: invoiceSample?.vatRate },
+		],
 	});
 
 	if (invoice.status >= 300) {
@@ -70,6 +92,7 @@ try {
 		const read = await call('GET', `/income/invoices/${created.invoice}`);
 		const record = read.body ?? {};
 		console.log(`   totals: net ${record.total_net}, vat ${record.total_vat}, gross ${record.total_gross}`);
+		console.log(`   document_date: ${record.document_date ?? 'absent'}`);
 		console.log(`   customer arrived: ${record.billing?.company ? 'yes' : 'NO — customer.id did not stick'}`);
 		console.log(`   line items in the response: ${Array.isArray(record.line_items) ? record.line_items.length : 'field absent'}`);
 	}
@@ -79,7 +102,14 @@ try {
 		name: 'API-Test n8n-nodes-papierkram',
 		provenance: 'domestic',
 		document_date: new Date().toISOString().slice(0, 10),
-		line_items: [{ name: 'Bueromaterial', amount: 11.9, vat_rate: 19, category: 'Bürobedarf' }],
+		line_items: [
+			{
+				name: 'Bueromaterial',
+				amount: 11.9,
+				vat_rate: voucherSample?.vatRate,
+				category: voucherSample?.category ?? 'Bürobedarf',
+			},
+		],
 	});
 
 	if (voucher.status >= 300) {

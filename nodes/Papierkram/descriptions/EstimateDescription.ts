@@ -252,7 +252,7 @@ export const estimateFields: INodeProperties[] = [
 		name: 'lineItems',
 		type: 'json',
 		default: '[]',
-		description: 'JSON array in the shape the API documents for "line_items"',
+		description: 'Positions as a JSON array. "vat_rate" is not a percentage but the name of a tax rate as the account has it configured — "19%", "0% Ohne USt (Kleinunternehmer)", or "Keine Vorsteuer" on a voucher. Nothing lists the valid names, so read one off an existing record.',
 		required: true,
 		routing: { send: { property: 'line_items', type: 'body', value: '={{ JSON.parse($value) }}' } },
 		displayOptions: {
@@ -393,6 +393,7 @@ export const estimateFields: INodeProperties[] = [
 				name: 'documentDate',
 				type: 'string',
 				default: '',
+				description: 'Date of the document as YYYY-MM-DD. The API rejects an invoice without it ("Datum muss ausgefüllt werden") although the specification marks it optional.',
 				routing: { send: { property: 'document_date', type: 'body' } },
 			},
 			{
@@ -572,6 +573,7 @@ export const estimateFields: INodeProperties[] = [
 				name: 'documentDate',
 				type: 'string',
 				default: '',
+				description: 'Date of the document as YYYY-MM-DD. The API rejects an invoice without it ("Datum muss ausgefüllt werden") although the specification marks it optional.',
 				routing: { send: { property: 'document_date', type: 'body' } },
 			},
 			{
@@ -609,7 +611,7 @@ export const estimateFields: INodeProperties[] = [
 				name: 'lineItems',
 				type: 'json',
 				default: '[]',
-				description: 'JSON array in the shape the API documents for "line_items"',
+				description: 'Positions as a JSON array. "vat_rate" is not a percentage but the name of a tax rate as the account has it configured — "19%", "0% Ohne USt (Kleinunternehmer)", or "Keine Vorsteuer" on a voucher. Nothing lists the valid names, so read one off an existing record.',
 				routing: { send: { property: 'line_items', type: 'body', value: '={{ JSON.parse($value) }}' } },
 			},
 			{
