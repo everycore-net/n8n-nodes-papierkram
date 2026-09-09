@@ -29,7 +29,7 @@
       },
       "id": "3f7a1b10-0001-4000-8000-000000000002",
       "name": "Rechnung anlegen",
-      "type": "n8n-nodes-papierkram.papierkram",
+      "type": "@everycore/n8n-nodes-papierkram.papierkram",
       "typeVersion": 1,
       "position": [0, 0]
     },
@@ -41,7 +41,7 @@
       },
       "id": "3f7a1b10-0001-4000-8000-000000000003",
       "name": "PDF holen",
-      "type": "n8n-nodes-papierkram.papierkram",
+      "type": "@everycore/n8n-nodes-papierkram.papierkram",
       "typeVersion": 1,
       "position": [220, 0]
     },

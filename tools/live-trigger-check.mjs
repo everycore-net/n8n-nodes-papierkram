@@ -91,6 +91,51 @@ try {
 	});
 	created.credentialId = credential.body?.data?.id ?? credential.body?.id;
 
+	// A manual execution has its own contract: show the newest records, spend one
+	// request, move nothing. It runs through the same route the editor uses.
+	console.log('--- manual execution');
+	{
+		const nodes = [
+			{
+				id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+				name: 'Papierkram Trigger',
+				type: '@everycore/n8n-nodes-papierkram.papierkramTrigger',
+				typeVersion: 1,
+				position: [0, 0],
+				parameters: { pollTimes: { item: [{ mode: 'everyHour' }] }, resource: 'company', mode: 'created' },
+				credentials: { papierkramApi: { id: created.credentialId, name: NAME } },
+			},
+		];
+		const draft = await rest('POST', '/rest/workflows', {
+			name: NAME,
+			settings: { executionOrder: 'v1' },
+			nodes,
+			connections: {},
+		});
+		const draftRecord = draft.body?.data ?? draft.body;
+		const run = await rest('POST', `/rest/workflows/${draftRecord.id}/run`, {
+			workflowData: { ...draftRecord, nodes, connections: {} },
+			triggerToStartFrom: { name: 'Papierkram Trigger' },
+			startNodes: [],
+		});
+		const executionId = (run.body?.data ?? run.body)?.executionId;
+		let delivered = null;
+		for (let attempt = 0; attempt < 10 && delivered === null; attempt += 1) {
+			await wait(2);
+			const detail = await rest('GET', `/rest/executions/${executionId}`);
+			const body = detail.body?.data ?? detail.body;
+			if (body?.status === 'success' || body?.finished === true) {
+				const raw = JSON.stringify(detail.body ?? {}).replace(/\\"/g, '"');
+				delivered = (raw.match(/"contact_type"/g) ?? []).length;
+			}
+		}
+		const stored = await rest('GET', `/rest/workflows/${draftRecord.id}`);
+		const staticData = (stored.body?.data ?? stored.body)?.staticData ?? null;
+		console.log(`   delivered ${delivered} record(s) ${delivered !== null && delivered <= 10 ? '(preview capped at ten)' : '(MORE THAN THE PREVIEW)'}`);
+		console.log(`   watermark after the manual run: ${JSON.stringify(staticData)} ${staticData === null ? '(untouched, as it should be)' : '(MOVED — a manual look consumed records)'}`);
+		await removeWorkflow(draftRecord.id);
+	}
+
 	const definition = {
 		name: NAME,
 		settings: { executionOrder: 'v1' },
@@ -98,7 +143,7 @@ try {
 			{
 				id: '88888888-8888-4888-8888-888888888888',
 				name: 'Papierkram Trigger',
-				type: 'n8n-nodes-papierkram.papierkramTrigger',
+				type: '@everycore/n8n-nodes-papierkram.papierkramTrigger',
 				typeVersion: 1,
 				position: [0, 0],
 				parameters: {

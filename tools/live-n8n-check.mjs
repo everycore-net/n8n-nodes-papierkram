@@ -61,7 +61,7 @@ const workflowWith = (parameters, credentialId, responseData) => ({
 		{
 			id: '33333333-3333-4333-8333-333333333333',
 			name: 'Papierkram',
-			type: 'n8n-nodes-papierkram.papierkram',
+			type: '@everycore/n8n-nodes-papierkram.papierkram',
 			typeVersion: 1,
 			position: [220, 0],
 			parameters,
@@ -82,7 +82,7 @@ const uploadWorkflow = (credentialId, invoiceId, lineItems) => {
 	const node = (id, name, parameters, position) => ({
 		id,
 		name,
-		type: 'n8n-nodes-papierkram.papierkram',
+		type: '@everycore/n8n-nodes-papierkram.papierkram',
 		typeVersion: 1,
 		position,
 		parameters,
@@ -166,6 +166,21 @@ try {
 	for (const workflow of (existing.body?.data ?? existing.body ?? [])) {
 		if (workflow.name !== NAME) continue;
 		console.log(`leftover workflow ${workflow.id}: delete HTTP ${await removeWorkflow(workflow.id)}`);
+	}
+
+	// Registration and the one piece of UI logic worth asserting: the trigger's
+	// "New and Updated" mode must not be offered where the API has no
+	// updated_at to offer it with.
+	const types = await rest('GET', '/types/nodes.json');
+	const all = types.body?.data ?? types.body ?? [];
+	for (const node of all) {
+		if (!String(node.name).includes('papierkram')) continue;
+		console.log(`registered: ${node.name} ("${node.displayName}")`);
+		const mode = (node.properties ?? []).find((property) => property.name === 'mode');
+		if (mode === undefined) continue;
+		const shown = mode.displayOptions?.show?.resource ?? [];
+		const wrong = ['invoice', 'estimate', 'voucher'].filter((resource) => shown.includes(resource));
+		console.log(`   Trigger On offered for ${shown.length} resources, ${wrong.length === 0 ? 'and for none that lacks updated_at' : `WRONGLY for ${wrong.join(', ')}`}`);
 	}
 
 	const credential = await rest('POST', '/rest/credentials', {

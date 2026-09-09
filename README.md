@@ -8,12 +8,12 @@ This is an independent open-source package. It is not built or endorsed by Papie
 ## Installation
 
 Self-hosted n8n, as an owner or admin: **Settings → Community nodes → Install** and enter
-`n8n-nodes-papierkram`.
+`@everycore/n8n-nodes-papierkram`.
 
 Manually, next to your n8n installation:
 
 ```bash
-npm install n8n-nodes-papierkram
+npm install @everycore/n8n-nodes-papierkram
 ```
 
 ## Credentials

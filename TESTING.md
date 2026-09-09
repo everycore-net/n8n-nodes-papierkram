@@ -48,7 +48,10 @@ suite.
 Checked in n8n **2.35.5** with `tools/live-n8n-check.mjs`, which builds a throwaway credential and a
 webhook workflow, drives them, and deletes both again:
 
-- [x] Both nodes register, and n8n derives a third one — *Papierkram Tool* — from `usableAsTool`.
+- [x] Both nodes register as `@everycore/n8n-nodes-papierkram.papierkram` and `.papierkramTrigger`,
+      and n8n derives a third one — *Papierkram Tool* — from `usableAsTool`.
+- [x] *Trigger On* is offered for the six resources that carry `updated_at` and for none of the
+      three that do not — read off the node description n8n actually serves, not off the source.
 - [x] *Invoice → Get Many*, limit 5 → five items, one invoice per item, no envelope around them.
 - [x] Return All → all 20 companies, so the `has_more` pagination expression works.
 - [x] *Invoice → PDF* → `application/pdf`, 63 kB, magic `%PDF`.
@@ -80,11 +83,15 @@ minutes, because that is how long the thing under test takes.
       that company's ID and name.
 - [x] **One** record in the payload, not the other 20: the watermark holds.
 
-Still worth a look by hand, since neither is a matter of logic:
+- [x] A manual execution, run through the same route the editor uses, delivered ten records — the
+      preview cap — and left the workflow's static data `null`. A look does not consume records.
 
-- [ ] Manual execution in the editor shows the newest records without moving the watermark.
-- [ ] *Trigger On: New and Updated Records* on a company: edit it, and the poll picks the edit up.
-      On invoices, estimates and vouchers the option must not appear at all.
+One thing is still only reasoned about rather than observed:
+
+- [ ] *Trigger On: New and Updated Records*: editing an existing company and seeing the poll pick
+      the edit up. The mechanism is the same watermark the unit tests cover, with `updated_at`
+      instead of `id`, and the sort order it needs was measured against the account — but the full
+      round trip has not been run.
 
 ### 3. The writing endpoints
 

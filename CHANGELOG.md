@@ -6,7 +6,8 @@ All notable changes to this package are documented here. The format follows
 
 ## 0.1.0 — 2026-09-09
 
-First release. Verified against n8n 2.35.5 and a live Papierkram account (package M).
+First release, published as `@everycore/n8n-nodes-papierkram`. Verified against n8n 2.35.5 and a
+live Papierkram account (package M).
 
 ### Added
 

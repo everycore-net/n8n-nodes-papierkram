@@ -1,8 +1,11 @@
 {
-  "node": "n8n-nodes-base.papierkram",
+  "node": "@everycore/n8n-nodes-papierkram.papierkram",
   "nodeVersion": "1.0",
   "codexVersion": "1.0",
-  "categories": ["Finance & Accounting", "Productivity"],
+  "categories": [
+    "Finance & Accounting",
+    "Productivity"
+  ],
   "resources": {
     "credentialDocumentation": [
       {

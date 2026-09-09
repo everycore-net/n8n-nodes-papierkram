@@ -32,8 +32,35 @@ jobs:
       - name: Install
         run: npm ci
 
+      # package.json is the single source of truth for what gets published, so
+      # everything downstream reads the name and version from it. A tag that
+      # disagrees is a mistake, not an override: npm would publish the version in
+      # package.json under a tag claiming a different one. A manual dispatch has
+      # no tag to compare against and skips the check - there GITHUB_REF_NAME is
+      # the branch, which is exactly why nothing else may use it either.
+      - name: Read the package identity
+        id: package
+        run: |
+          echo "name=$(node -p "require('./package.json').name")" >> "$GITHUB_OUTPUT"
+          echo "version=$(node -p "require('./package.json').version")" >> "$GITHUB_OUTPUT"
+
+      - name: Tag and package version must agree
+        if: github.ref_type == 'tag'
+        run: |
+          TAG_VERSION="${GITHUB_REF_NAME#v}"
+          if [ "${{ steps.package.outputs.version }}" != "$TAG_VERSION" ]; then
+            echo "package.json is ${{ steps.package.outputs.version }} but the tag says $TAG_VERSION"
+            exit 1
+          fi
+
       - name: Lint
         run: npm run lint
+
+      # The trigger holds the only real logic in this package, and the tests
+      # assert how many API requests a poll costs. That is worth a release gate:
+      # a regression there spends a customer's monthly credit budget quietly.
+      - name: Test
+        run: npm test
 
       - name: Build
         run: npm run build
@@ -44,9 +71,8 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       # The scanner resolves a package by name from the registry, so it cannot
-      # look at a tarball and cannot run before the first publish - it would 404
-      # and take the release with it. It is a verification of what went out,
-      # which is why a failure here means deprecating the version rather than
-      # retrying the job.
+      # look at a tarball and cannot run before the publish - it would 404 and
+      # take the release with it. It is a verification of what went out, which is
+      # why a failure here means deprecating the version rather than retrying.
       - name: Check the published package against the community rules
-        run: npx @n8n/scan-community-package "n8n-nodes-papierkram@${GITHUB_REF_NAME#v}"
+        run: npx @n8n/scan-community-package "${{ steps.package.outputs.name }}@${{ steps.package.outputs.version }}"

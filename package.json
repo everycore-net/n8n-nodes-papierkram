@@ -1,5 +1,5 @@
 {
-  "name": "n8n-nodes-papierkram",
+  "name": "@everycore/n8n-nodes-papierkram",
   "version": "0.1.0",
   "description": "n8n community node for the Papierkram.de API: invoices, estimates, vouchers, contacts, projects and time tracking",
   "keywords": [
