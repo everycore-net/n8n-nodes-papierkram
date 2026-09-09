@@ -4,11 +4,15 @@
   "description": "n8n community node for the Papierkram.de API: invoices, estimates, vouchers, contacts, projects and time tracking",
   "keywords": [
     "n8n-community-node-package",
+    "n8n",
     "papierkram",
     "buchhaltung",
     "accounting",
     "zeiterfassung",
-    "invoicing"
+    "invoicing",
+    "erp",
+    "automation",
+    "germany"
   ],
   "license": "MIT",
   "homepage": "https://everycore.net",
@@ -32,7 +36,9 @@
     "lint": "n8n-node lint",
     "lint:fix": "n8n-node lint --fix",
     "release": "n8n-node release",
-    "prepublishOnly": "n8n-node prerelease"
+    "prepublishOnly": "n8n-node prerelease",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "files": [
     "dist"
@@ -49,13 +55,17 @@
     ]
   },
   "devDependencies": {
-    "@n8n/node-cli": "latest",
+    "@n8n/node-cli": "0.47.0",
     "eslint": "9.39.4",
     "prettier": "3.8.3",
     "release-it": "20.2.0",
-    "typescript": "5.9.3"
+    "typescript": "5.9.3",
+    "vitest": "^3.2.7"
   },
   "peerDependencies": {
     "n8n-workflow": "*"
+  },
+  "bugs": {
+    "url": "https://github.com/everycore-net/n8n-nodes-papierkram/issues"
   }
 }
