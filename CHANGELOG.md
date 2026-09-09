@@ -4,6 +4,22 @@ All notable changes to this package are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the versions follow
 [semantic versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.2.0 — 2026-09-09
+
+### Changed
+
+- **The package is now `n8n-nodes-papierkram`, without the `@everycore` scope.** The scope cost the
+  nodes their icons: n8n builds the icon URL from the package name, and for a scoped package the
+  result never resolves, so the editor draws a broken image where the icon belongs
+  ([n8n#14408](https://github.com/n8n-io/n8n/issues/14408)). The files were served correctly the
+  whole time — the URL simply did not reach them.
+- Switching to a built-in `fa:` icon would have avoided the rename, but community nodes may not use
+  one: `@n8n/community-nodes/icon-validation` requires the `file:` protocol. So the choice was the
+  scope or the icon, and the icon is what every user sees.
+- Node type IDs follow the package name, so a workflow built against `@everycore/…` needs its
+  Papierkram nodes replaced. Nothing else changed: same nodes, same parameters, same credential.
+- `@everycore/n8n-nodes-papierkram` is deprecated on npm and points here.
+
 ## 0.1.1 — 2026-09-09
 
 ### Changed
@@ -19,7 +35,7 @@ All notable changes to this package are documented here. The format follows
 
 ## 0.1.0 — 2026-09-09
 
-First release, published as `@everycore/n8n-nodes-papierkram`. Verified against n8n 2.35.5 and a
+First release, published as `n8n-nodes-papierkram`. Verified against n8n 2.35.5 and a
 live Papierkram account (package M).
 
 ### Added

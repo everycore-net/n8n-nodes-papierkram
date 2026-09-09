@@ -61,7 +61,7 @@ const workflowWith = (parameters, credentialId, responseData) => ({
 		{
 			id: '33333333-3333-4333-8333-333333333333',
 			name: 'Papierkram',
-			type: '@everycore/n8n-nodes-papierkram.papierkram',
+			type: 'n8n-nodes-papierkram.papierkram',
 			typeVersion: 1,
 			position: [220, 0],
 			parameters,
@@ -82,7 +82,7 @@ const uploadWorkflow = (credentialId, invoiceId, lineItems) => {
 	const node = (id, name, parameters, position) => ({
 		id,
 		name,
-		type: '@everycore/n8n-nodes-papierkram.papierkram',
+		type: 'n8n-nodes-papierkram.papierkram',
 		typeVersion: 1,
 		position,
 		parameters,

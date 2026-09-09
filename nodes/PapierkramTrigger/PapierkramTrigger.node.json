@@ -1,5 +1,5 @@
 {
-  "node": "@everycore/n8n-nodes-papierkram.papierkramTrigger",
+  "node": "n8n-nodes-papierkram.papierkramTrigger",
   "nodeVersion": "1.0",
   "codexVersion": "1.0",
   "categories": [
