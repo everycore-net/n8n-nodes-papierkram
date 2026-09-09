@@ -4,6 +4,19 @@ All notable changes to this package are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the versions follow
 [semantic versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.1.1 — 2026-09-09
+
+### Changed
+
+- The node interface is English throughout. Resource descriptions used German domain nouns —
+  *Rechnungen*, *Angebote*, *Zeiterfassung* — which reads well to a German user and breaks n8n's
+  verification guideline that interface and documentation must be English only. The example
+  workflows and their notes are translated for the same reason.
+- What stays German is what the API stores or answers, quoted as a value and glossed in English:
+  tax rate names like `0% Ohne USt (Kleinunternehmer)`, the category `Bürobedarf`, the error
+  *"Datum muss ausgefüllt werden"*. Those are not interface language; they are strings a workflow
+  has to match exactly.
+
 ## 0.1.0 — 2026-09-09
 
 First release, published as `@everycore/n8n-nodes-papierkram`. Verified against n8n 2.35.5 and a

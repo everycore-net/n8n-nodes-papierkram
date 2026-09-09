@@ -261,7 +261,7 @@ export const voucherFields: INodeProperties[] = [
 		name: 'lineItems',
 		type: 'json',
 		default: '[]',
-		description: 'Positions as a JSON array. "vat_rate" is not a percentage but the name of a tax rate as the account has it configured — "19%", "0% Ohne USt (Kleinunternehmer)", or "Keine Vorsteuer" on a voucher. Nothing lists the valid names, so read one off an existing record.',
+		description: 'Positions as a JSON array. "vat_rate" is not a percentage but the name of a tax rate as configured in the account, spelled exactly as Papierkram spells it: "19%", or "0% Ohne USt (Kleinunternehmer)" for a small business, or "Keine Vorsteuer" for a voucher without input tax. Nothing lists the valid names, so copy one from an existing record.',
 		required: true,
 		routing: { send: { property: 'line_items', type: 'body', value: '={{ JSON.parse($value) }}' } },
 		displayOptions: {
@@ -336,7 +336,7 @@ export const voucherFields: INodeProperties[] = [
 				name: 'documentDate',
 				type: 'string',
 				default: '',
-				description: 'Date of the document as YYYY-MM-DD. The API rejects an invoice without it ("Datum muss ausgefüllt werden") although the specification marks it optional.',
+				description: 'Date of the document as YYYY-MM-DD. The API rejects an invoice without it, answering "Datum muss ausgefüllt werden" (the date is required), although the specification marks the field optional.',
 				routing: { send: { property: 'document_date', type: 'body' } },
 			},
 			{
@@ -403,7 +403,7 @@ export const voucherFields: INodeProperties[] = [
 				name: 'documentDate',
 				type: 'string',
 				default: '',
-				description: 'Date of the document as YYYY-MM-DD. The API rejects an invoice without it ("Datum muss ausgefüllt werden") although the specification marks it optional.',
+				description: 'Date of the document as YYYY-MM-DD. The API rejects an invoice without it, answering "Datum muss ausgefüllt werden" (the date is required), although the specification marks the field optional.',
 				routing: { send: { property: 'document_date', type: 'body' } },
 			},
 			{
@@ -441,7 +441,7 @@ export const voucherFields: INodeProperties[] = [
 				name: 'lineItems',
 				type: 'json',
 				default: '[]',
-				description: 'Positions as a JSON array. "vat_rate" is not a percentage but the name of a tax rate as the account has it configured — "19%", "0% Ohne USt (Kleinunternehmer)", or "Keine Vorsteuer" on a voucher. Nothing lists the valid names, so read one off an existing record.',
+				description: 'Positions as a JSON array. "vat_rate" is not a percentage but the name of a tax rate as configured in the account, spelled exactly as Papierkram spells it: "19%", or "0% Ohne USt (Kleinunternehmer)" for a small business, or "Keine Vorsteuer" for a voucher without input tax. Nothing lists the valid names, so copy one from an existing record.',
 				routing: { send: { property: 'line_items', type: 'body', value: '={{ JSON.parse($value) }}' } },
 			},
 			{

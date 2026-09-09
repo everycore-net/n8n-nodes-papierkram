@@ -53,7 +53,7 @@ export class PapierkramApi implements ICredentialType {
 			default: '',
 			required: true,
 			description:
-				'Token created under Einstellungen -> API. It is bound to the account above and stays valid until it is deleted there.',
+				'Token created in the account settings under "Einstellungen -> API", the API section of the German interface. It is bound to the account above and stays valid until it is deleted there.',
 		},
 	];
 

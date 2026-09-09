@@ -1,9 +1,15 @@
 {
-  "name": "Papierkram — auf neue und geänderte Unternehmen reagieren",
+  "name": "Papierkram — react to new and changed companies",
   "nodes": [
     {
       "parameters": {
-        "pollTimes": { "item": [{ "mode": "everyHour" }] },
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyHour"
+            }
+          ]
+        },
         "resource": "company",
         "mode": "updated"
       },
@@ -11,58 +17,95 @@
       "name": "Papierkram Trigger",
       "type": "@everycore/n8n-nodes-papierkram.papierkramTrigger",
       "typeVersion": 1,
-      "position": [-220, 0]
+      "position": [
+        -220,
+        0
+      ]
     },
     {
       "parameters": {
         "conditions": {
-          "options": { "caseSensitive": true, "version": 2 },
+          "options": {
+            "caseSensitive": true,
+            "version": 2
+          },
           "conditions": [
             {
               "id": "3f7a1b10-0002-4000-8000-00000000000b",
               "leftValue": "={{ $json.contact_type }}",
               "rightValue": "customer",
-              "operator": { "type": "string", "operation": "equals" }
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
             }
           ],
           "combinator": "and"
         }
       },
       "id": "3f7a1b10-0002-4000-8000-000000000002",
-      "name": "Nur Kunden",
+      "name": "Customers only",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
-      "position": [0, 0]
+      "position": [
+        0,
+        0
+      ]
     },
     {
       "parameters": {},
       "id": "3f7a1b10-0002-4000-8000-000000000003",
-      "name": "Hier weiterverarbeiten",
+      "name": "Continue here",
       "type": "n8n-nodes-base.noOp",
       "typeVersion": 1,
-      "position": [220, -80]
+      "position": [
+        220,
+        -80
+      ]
     },
     {
       "parameters": {
-        "content": "## Neue und geänderte Unternehmen\n\n**Trigger On** steht auf *New and Updated Records*. Das geht nur bei Ressourcen, die `updated_at` mitliefern: Unternehmen, Projekte, Waren/Dienstleistungen, Aufgaben, Zeiterfassung und Banktransaktionen.\n\nBei **Rechnungen, Angeboten und Belegen gibt es das Feld nicht** — dort sieht der Trigger nur neue Datensätze, und die Option wird gar nicht erst angeboten.\n\nDer erste Lauf nach dem Aktivieren merkt sich nur den Stand und löst nichts aus. Das ist Absicht: sonst liefe beim Einschalten das ganze Konto durch den Workflow.\n\nJeder Poll kostet API-Credits aus dem Monatsbudget des Kontos, auch wenn er nichts findet. Stündlich ist für Stammdaten meist reichlich.",
+        "content": "## New and changed companies\n\n**Trigger On** is set to *New and Updated Records*. That mode only exists for the resources that carry `updated_at`: companies, projects, products and services, tasks, tracked time and bank transactions.\n\n**Invoices, estimates and vouchers do not have the field**, so there the trigger only sees new records, and the option is not offered at all.\n\nThe first poll after activating only remembers where \"now\" is and fires nothing. That is deliberate: otherwise switching the workflow on would run the whole account through it.\n\nEvery poll spends API credits from the account's monthly budget, even when it finds nothing. Hourly is usually plenty for master data.",
         "height": 400,
         "width": 420
       },
       "id": "3f7a1b10-0002-4000-8000-000000000004",
-      "name": "Hinweise",
+      "name": "Notes",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
-      "position": [-220, 160]
+      "position": [
+        -220,
+        160
+      ]
     }
   ],
   "connections": {
     "Papierkram Trigger": {
-      "main": [[{ "node": "Nur Kunden", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Customers only",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
-    "Nur Kunden": {
-      "main": [[{ "node": "Hier weiterverarbeiten", "type": "main", "index": 0 }], []]
+    "Customers only": {
+      "main": [
+        [
+          {
+            "node": "Continue here",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
     }
   },
-  "settings": { "executionOrder": "v1" },
+  "settings": {
+    "executionOrder": "v1"
+  },
   "pinData": {}
 }

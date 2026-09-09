@@ -18,7 +18,7 @@ npm install @everycore/n8n-nodes-papierkram
 
 ## Credentials
 
-1. In Papierkram open **Einstellungen → API** and create a token. The page is only available in the
+1. In Papierkram open **Einstellungen → API** — the API section of the account settings, the interface is German — and create a token. The page is only available in the
    **M** and **L** packages — the API is not part of the smaller ones.
 2. In n8n create a **Papierkram API** credential:
    - **Account** — the subdomain, so `meinefirma` for `https://meinefirma.papierkram.de`.
@@ -94,7 +94,7 @@ Ready to import, in [`examples/`](examples):
 | --- | --- |
 | [`create-invoice.json`](examples/create-invoice.json) | Webhook → *Invoice: Create* → *Invoice: PDF*. Nested customer, positions as JSON, and the two fields the API specification gets wrong. |
 | [`watch-new-companies.json`](examples/watch-new-companies.json) | Trigger in *New and Updated Records* mode, filtered to customers. Explains which resources can do "updated" at all. |
-| [`voucher-from-email-attachment.json`](examples/voucher-from-email-attachment.json) | IMAP → *Voucher: Create* → *Voucher Document: Create*. The receipt from the mailbox ends up on the Beleg. |
+| [`voucher-from-email-attachment.json`](examples/voucher-from-email-attachment.json) | IMAP → *Voucher: Create* → *Voucher Document: Create*. The receipt from the mailbox ends up on the voucher. |
 
 Each carries a sticky note with the account-specific values it needs, because those are exactly what
 a copied workflow gets wrong on the first run.

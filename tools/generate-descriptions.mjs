@@ -41,28 +41,28 @@ const RESOURCES = [
 		displayName: 'Bank Connection',
 		plural: 'bank connections',
 		path: '/banking/bank_connections',
-		description: 'Bankverbindungen, read only',
+		description: 'Bank connections, read only',
 	},
 	{
 		name: 'bankTransaction',
 		displayName: 'Bank Transaction',
 		plural: 'bank transactions',
 		path: '/banking/transactions',
-		description: 'Banktransaktionen, read only',
+		description: 'Bank transactions, read only',
 	},
 	{
 		name: 'company',
 		displayName: 'Company',
 		plural: 'companies',
 		path: '/contact/companies',
-		description: 'Unternehmen: customers and suppliers',
+		description: 'Customers and suppliers',
 	},
 	{
 		name: 'contactPerson',
 		displayName: 'Contact Person',
 		plural: 'contact persons',
 		path: '/contact/companies/{company_id}/persons',
-		description: 'Kontaktpersonen of one company',
+		description: 'Contact persons of one company',
 		parents: ['company_id'],
 	},
 	{
@@ -70,14 +70,14 @@ const RESOURCES = [
 		displayName: 'Custom Attribute',
 		plural: 'custom attributes',
 		path: '/settings/custom_attributes',
-		description: 'Benutzerdefinierte Felder',
+		description: 'Custom fields on companies and projects',
 	},
 	{
 		name: 'estimate',
 		displayName: 'Estimate',
 		plural: 'estimates',
 		path: '/income/estimates',
-		description: 'Angebote',
+		description: 'Estimates and quotes',
 	},
 	{
 		name: 'info',
@@ -92,56 +92,56 @@ const RESOURCES = [
 		displayName: 'Invoice',
 		plural: 'invoices',
 		path: '/income/invoices',
-		description: 'Rechnungen',
+		description: 'Outgoing invoices',
 	},
 	{
 		name: 'paymentTerm',
 		displayName: 'Payment Term',
 		plural: 'payment terms',
 		path: '/income/payment_terms',
-		description: 'Zahlungsbedingungen, read only',
+		description: 'Payment terms, read only',
 	},
 	{
 		name: 'project',
 		displayName: 'Project',
 		plural: 'projects',
 		path: '/projects',
-		description: 'Projekte',
+		description: 'Projects',
 	},
 	{
 		name: 'proposition',
 		displayName: 'Proposition',
 		plural: 'propositions',
 		path: '/income/propositions',
-		description: 'Waren und Dienstleistungen',
+		description: 'Products and services',
 	},
 	{
 		name: 'task',
 		displayName: 'Task',
 		plural: 'tasks',
 		path: '/tracker/tasks',
-		description: 'Aufgaben in the time tracker',
+		description: 'Tasks in the time tracker',
 	},
 	{
 		name: 'timeEntry',
 		displayName: 'Time Entry',
 		plural: 'time entries',
 		path: '/tracker/time_entries',
-		description: 'Zeiterfassung',
+		description: 'Tracked time',
 	},
 	{
 		name: 'user',
 		displayName: 'User',
 		plural: 'users',
 		path: '/users',
-		description: 'Benutzer, read only',
+		description: 'Users, read only',
 	},
 	{
 		name: 'voucher',
 		displayName: 'Voucher',
 		plural: 'vouchers',
 		path: '/expense/vouchers',
-		description: 'Belege on the expense side',
+		description: 'Expense vouchers and receipts',
 	},
 	{
 		name: 'voucherDocument',
@@ -367,9 +367,9 @@ function propertyFor(leaf) {
  */
 const FIELD_NOTES = {
 	document_date:
-		'Date of the document as YYYY-MM-DD. The API rejects an invoice without it ("Datum muss ausgefüllt werden") although the specification marks it optional',
+		'Date of the document as YYYY-MM-DD. The API rejects an invoice without it, answering "Datum muss ausgefüllt werden" (the date is required), although the specification marks the field optional',
 	line_items:
-		'Positions as a JSON array. "vat_rate" is not a percentage but the name of a tax rate as the account has it configured — "19%", "0% Ohne USt (Kleinunternehmer)", or "Keine Vorsteuer" on a voucher. Nothing lists the valid names, so read one off an existing record',
+		'Positions as a JSON array. "vat_rate" is not a percentage but the name of a tax rate as configured in the account, spelled exactly as Papierkram spells it: "19%", or "0% Ohne USt (Kleinunternehmer)" for a small business, or "Keine Vorsteuer" for a voucher without input tax. Nothing lists the valid names, so copy one from an existing record',
 };
 
 const byDisplayName = (a, b) => a.displayName.localeCompare(b.displayName);

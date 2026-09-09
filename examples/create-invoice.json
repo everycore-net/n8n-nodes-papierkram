@@ -1,5 +1,5 @@
 {
-  "name": "Papierkram — Rechnung aus einem Webhook anlegen",
+  "name": "Papierkram — create an invoice from a webhook",
   "nodes": [
     {
       "parameters": {
@@ -12,26 +12,32 @@
       "name": "Webhook",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
-      "position": [-220, 0],
+      "position": [
+        -220,
+        0
+      ],
       "webhookId": "3f7a1b10-0001-4000-8000-00000000000a"
     },
     {
       "parameters": {
         "resource": "invoice",
         "operation": "create",
-        "name": "={{ $json.betreff }}",
-        "lineItems": "={{ JSON.stringify($json.positionen) }}",
+        "name": "={{ $json.subject }}",
+        "lineItems": "={{ JSON.stringify($json.positions) }}",
         "additionalFields": {
-          "customerId": "={{ $json.kundeId }}",
+          "customerId": "={{ $json.customerId }}",
           "documentDate": "={{ $now.format('yyyy-MM-dd') }}",
           "paymentTermId": 1
         }
       },
       "id": "3f7a1b10-0001-4000-8000-000000000002",
-      "name": "Rechnung anlegen",
+      "name": "Create invoice",
       "type": "@everycore/n8n-nodes-papierkram.papierkram",
       "typeVersion": 1,
-      "position": [0, 0]
+      "position": [
+        0,
+        0
+      ]
     },
     {
       "parameters": {
@@ -40,32 +46,56 @@
         "invoiceId": "={{ $json.id }}"
       },
       "id": "3f7a1b10-0001-4000-8000-000000000003",
-      "name": "PDF holen",
+      "name": "Fetch PDF",
       "type": "@everycore/n8n-nodes-papierkram.papierkram",
       "typeVersion": 1,
-      "position": [220, 0]
+      "position": [
+        220,
+        0
+      ]
     },
     {
       "parameters": {
-        "content": "## Rechnung anlegen\n\nDer Webhook erwartet:\n\n```json\n{\n  \"betreff\": \"Beratung September\",\n  \"kundeId\": 6,\n  \"positionen\": [\n    { \"name\": \"Beratung\", \"quantity\": 8, \"unit\": \"Stunde\", \"price\": 120, \"vat_rate\": \"19%\" }\n  ]\n}\n```\n\n**vat_rate ist keine Prozentzahl**, sondern der Name des Steuersatzes, wie er im Konto konfiguriert ist — `19%`, oder `0% Ohne USt (Kleinunternehmer)`. Kein Endpunkt liefert die gültigen Namen; die einfachste Quelle ist eine bestehende Rechnung.\n\n**Document Date ist Pflicht**, auch wenn die API-Doku es als optional führt.\n\nDie Rechnung entsteht als Entwurf und hat noch keine Nummer. Zum Versenden danach *Invoice → Deliver* anhängen.",
+        "content": "## Create an invoice\n\nThe webhook expects:\n\n```json\n{\n  \"subject\": \"Consulting, September\",\n  \"customerId\": 6,\n  \"positions\": [\n    { \"name\": \"Consulting\", \"quantity\": 8, \"unit\": \"Stunde\", \"price\": 120, \"vat_rate\": \"19%\" }\n  ]\n}\n```\n\n**vat_rate is not a percentage.** It is the name of a tax rate as configured in the account, spelled exactly as Papierkram spells it — `19%`, or `0% Ohne USt (Kleinunternehmer)` for a small business. No endpoint lists the valid names; the easiest source is an existing invoice.\n\n**Document Date is required**, although the API documentation marks it optional.\n\nThe invoice is created as a draft and has no number yet. To send it, append *Invoice → Deliver*.",
         "height": 460,
         "width": 420
       },
       "id": "3f7a1b10-0001-4000-8000-000000000004",
-      "name": "Hinweise",
+      "name": "Notes",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
-      "position": [-220, 160]
+      "position": [
+        -220,
+        160
+      ]
     }
   ],
   "connections": {
     "Webhook": {
-      "main": [[{ "node": "Rechnung anlegen", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Create invoice",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
-    "Rechnung anlegen": {
-      "main": [[{ "node": "PDF holen", "type": "main", "index": 0 }]]
+    "Create invoice": {
+      "main": [
+        [
+          {
+            "node": "Fetch PDF",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
-  "settings": { "executionOrder": "v1" },
+  "settings": {
+    "executionOrder": "v1"
+  },
   "pinData": {}
 }
