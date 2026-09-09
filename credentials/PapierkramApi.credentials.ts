@@ -1,9 +1,15 @@
 import type {
-	IAuthenticateGeneric,
+	ICredentialDataDecryptedObject,
 	ICredentialTestRequest,
 	ICredentialType,
+	IHttpRequestOptions,
 	INodeProperties,
 } from 'n8n-workflow';
+
+/** A DNS label: letters, digits and inner hyphens, nothing else. */
+const ACCOUNT_NAME = /^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/i;
+
+const HOST_SUFFIX = 'papierkram.de';
 
 /**
  * Connection to one Papierkram account.
@@ -37,7 +43,7 @@ export class PapierkramApi implements ICredentialType {
 			required: true,
 			placeholder: 'meinefirma',
 			description:
-				'Subdomain of the account, the part before ".papierkram.de". For https://meinefirma.papierkram.de this is "meinefirma".',
+				'Subdomain of the account, the part before ".papierkram.de". For https://meinefirma.papierkram.de this is "meinefirma" — the name only, not a URL and not a path.',
 		},
 		{
 			displayName: 'API Token',
@@ -51,13 +57,49 @@ export class PapierkramApi implements ICredentialType {
 		},
 	];
 
-	authenticate: IAuthenticateGeneric = {
-		type: 'generic',
-		properties: {
-			headers: {
-				Authorization: '=Bearer {{$credentials.apiToken}}',
-			},
-		},
+	/**
+	 * The account name ends up inside a hostname, so it is checked here rather
+	 * than trusted: this runs for every request the node makes, including the
+	 * credential test, which makes it the one place where the guarantee holds.
+	 *
+	 * The guarantee is that the token can only ever be sent to
+	 * <account>.papierkram.de over HTTPS. A name containing "/", "@" or ":" would
+	 * otherwise be a way to point a stored token at another host, and while only
+	 * the credential's own owner can type it, "only the owner can" is a weak
+	 * thing to rest a secret on.
+	 */
+	authenticate = async (
+		credentials: ICredentialDataDecryptedObject,
+		requestOptions: IHttpRequestOptions,
+	): Promise<IHttpRequestOptions> => {
+		const account = String(credentials.subdomain ?? '').trim();
+
+		if (!ACCOUNT_NAME.test(account)) {
+			throw new Error(
+				`"${account}" is not a Papierkram account name. Enter only the part before ".papierkram.de", for example "meinefirma".`,
+			);
+		}
+
+		const expected = `${account.toLowerCase()}.${HOST_SUFFIX}`;
+		let target: URL;
+		try {
+			target = new URL(requestOptions.url ?? '', requestOptions.baseURL);
+		} catch {
+			throw new Error(`Cannot tell where this request would go: ${requestOptions.url ?? '(no URL)'}`);
+		}
+
+		if (target.protocol !== 'https:' || target.hostname.toLowerCase() !== expected) {
+			throw new Error(
+				`Refusing to send the Papierkram token to ${target.protocol}//${target.hostname}; this credential is only valid for https://${expected}.`,
+			);
+		}
+
+		requestOptions.headers = {
+			...requestOptions.headers,
+			Authorization: `Bearer ${String(credentials.apiToken ?? '')}`,
+		};
+
+		return requestOptions;
 	};
 
 	/**
