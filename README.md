@@ -55,6 +55,11 @@ limit becomes `page_size`, so asking for 10 invoices costs one request for 10 re
 
 **PDF** puts the document in the binary property `data`.
 
+The node is marked `usableAsTool`, so n8n also offers it as **Papierkram Tool** to AI agent nodes.
+
+Verified against n8n **2.35.5** and a live account on 9 September 2026 — see [TESTING.md](TESTING.md)
+for what was checked and what the API does that its own specification does not mention.
+
 Nested API fields are flat parameters with their path as the name: the customer of an invoice is
 `Customer ID`, which is sent as `customer.id`. Fields the API documents as arrays or objects —
 `line_items` on an invoice, `custom_attributes` anywhere — take JSON, which is what an expression

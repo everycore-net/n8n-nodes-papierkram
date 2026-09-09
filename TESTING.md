@@ -38,16 +38,27 @@ npm run dev     # starts n8n with the node linked in
 
 ## Still open
 
-### 1. The node inside n8n
+### 1. The node inside n8n — done on 9 September 2026
 
-The API answers correctly; whether the declarative routing hands it on correctly is a different
-question, and only the runtime can settle it.
+Checked in n8n **2.35.5** with `tools/live-n8n-check.mjs`, which builds a throwaway credential and a
+webhook workflow, drives them, and deletes both again:
 
-- [ ] *Invoice → Get Many*, Return All off, limit 5 → five items, one invoice per item, no envelope
-      around them, and the request carried `page_size=5` rather than trimming afterwards.
-- [ ] Return All on, in an account with more than 100 records of that kind → everything arrives.
-- [ ] *Invoice → PDF* → the output item has binary data in `data` and it opens.
-- [ ] Credential test in the credential dialog.
+- [x] Both nodes register, and n8n derives a third one — *Papierkram Tool* — from `usableAsTool`.
+- [x] *Invoice → Get Many*, limit 5 → five items, one invoice per item, no envelope around them.
+- [x] Return All → all 20 companies, so the `has_more` pagination expression works.
+- [x] *Invoice → PDF* → `application/pdf`, 63 kB, magic `%PDF`.
+- [x] Voucher document upload **through the node**: create voucher → invoice PDF → upload → read
+      back reports one attached document. This is the multipart path over n8n's own HTTP layer,
+      which the API-level check could not cover.
+- [x] Credential test: green — after a fix. It answered *Not Acceptable* first, because Papierkram
+      returns **406 without an `Accept` header** and `ICredentialTestRequest` sends none by itself.
+      The node was never affected, so nothing but a real credential dialog would have caught it.
+
+Three n8n 2.x details worth writing down, all of them found the hard way: a workflow activates
+through `POST /rest/workflows/:id/activate` and needs the `versionId` it last handed out (a plain
+`PATCH {active:true}` answers 200 and leaves it off), deletion requires archiving first, and a
+webhook in `lastNode` mode returns only the first item unless `responseData` says otherwise — which
+makes any item count meaningless and hands back a PDF as JSON.
 
 ### 2. Trigger
 
