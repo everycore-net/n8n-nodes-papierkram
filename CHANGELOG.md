@@ -9,7 +9,7 @@ All notable changes to this package are documented here. The format follows
 ### Fixed
 
 - Six actions had no label in the node's action list — Archive, Cancel, Pay, PDF and Unarchive
-  showed an icon and nothing else, and Cancel With Reverse Entry showed a lone . A regular
+  showed an icon and nothing else, and Cancel With Reverse Entry showed a lone `)`. A regular
   expression in the generator lost its backslashes during an edit, turning "strip a parenthetical
   aside" into "delete everything up to the first bracket".
 - Operation names now split camel case, so the dropdown reads *Cancel With Reverse Entry* rather
