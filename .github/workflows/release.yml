@@ -38,10 +38,15 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Check against the community package rules
-        run: npx @n8n/scan-community-package n8n-nodes-papierkram
-
       - name: Publish
         run: npm publish --provenance --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      # The scanner resolves a package by name from the registry, so it cannot
+      # look at a tarball and cannot run before the first publish - it would 404
+      # and take the release with it. It is a verification of what went out,
+      # which is why a failure here means deprecating the version rather than
+      # retrying the job.
+      - name: Check the published package against the community rules
+        run: npx @n8n/scan-community-package "n8n-nodes-papierkram@${GITHUB_REF_NAME#v}"
