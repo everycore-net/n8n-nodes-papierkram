@@ -16,7 +16,7 @@ export const taskOperations: INodeProperties[] = [
 				name: 'Archive',
 				value: 'archive',
 				description: 'Archive a task',
-				action: '',
+				action: 'Archive a task',
 				routing: {
 					request: { method: 'POST', url: '=/tracker/tasks/{{$parameter["taskId"]}}/archive' },
 				},
@@ -71,7 +71,7 @@ export const taskOperations: INodeProperties[] = [
 				name: 'Unarchive',
 				value: 'unarchive',
 				description: 'Unarchive a task',
-				action: '',
+				action: 'Unarchive a task',
 				routing: {
 					request: { method: 'POST', url: '=/tracker/tasks/{{$parameter["taskId"]}}/unarchive' },
 				},

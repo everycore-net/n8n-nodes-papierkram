@@ -174,8 +174,14 @@ const ACRONYMS = {
 	no: 'No',
 };
 const titleWord = (w) => ACRONYMS[w.toLowerCase()] ?? w.charAt(0).toUpperCase() + w.slice(1);
+/**
+ * Operation names arrive as camelCase — cancelWithReverseEntry — and field paths
+ * as snake_case, so the split has to cover both or the dropdown reads
+ * "CancelWithReverseEntry".
+ */
 const title = (s) =>
 	s
+		.replace(/([a-z0-9])([A-Z])/g, '$1 $2')
 		.split(/[_\s.-]+/)
 		.filter(Boolean)
 		.map(titleWord)
@@ -250,12 +256,23 @@ const resourceNoun = (resource) => resource.displayName.toLowerCase();
 function label(resource, entry) {
 	const known = OPERATION_LABEL[entry.op];
 	if (known) return { name: known[0], description: known[1](resource), action: known[2](resource) };
+	// The spec describes this one ("Retrieves an invoice as a PDF") where the
+	// action list wants an instruction, like every other row in it.
+	if (entry.op === 'pdf') {
+		return {
+			name: 'PDF',
+			description: `Download ${one(resource)} as a PDF`,
+			action: `Download ${one(resource)} as a PDF`,
+		};
+	}
 	const summary = clean(spec.paths[entry.path][entry.method].summary);
 	const fallback = `${title(entry.op)} ${one(resource)}`;
 	return {
 		name: title(entry.op),
 		description: summary || fallback,
-		action: (summary || fallback).replace(/s*([^)]*)/g, ''),
+		// Drop a parenthetical aside — the action list wants a short imperative,
+		// and n8n's lint wants sentence case, which a quoted German term breaks.
+		action: (summary || fallback).replace(/\s*\([^()]*\)/g, '').trim(),
 	};
 }
 

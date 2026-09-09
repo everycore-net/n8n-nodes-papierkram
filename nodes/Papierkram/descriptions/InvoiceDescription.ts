@@ -16,7 +16,7 @@ export const invoiceOperations: INodeProperties[] = [
 				name: 'Archive',
 				value: 'archive',
 				description: 'Archive an invoice',
-				action: '',
+				action: 'Archive an invoice',
 				routing: {
 					request: { method: 'POST', url: '=/income/invoices/{{$parameter["invoiceId"]}}/archive' },
 				},
@@ -25,7 +25,7 @@ export const invoiceOperations: INodeProperties[] = [
 				name: 'Cancel',
 				value: 'cancel',
 				description: 'Cancel an invoice',
-				action: '',
+				action: 'Cancel an invoice',
 				routing: {
 					request: { method: 'POST', url: '=/income/invoices/{{$parameter["invoiceId"]}}/cancel' },
 				},
@@ -52,7 +52,7 @@ export const invoiceOperations: INodeProperties[] = [
 				name: 'Deliver',
 				value: 'deliver',
 				description: 'Deliver an invoice',
-				action: '',
+				action: 'Deliver an invoice',
 				routing: {
 					request: { method: 'POST', url: '=/income/invoices/{{$parameter["invoiceId"]}}/deliver' },
 				},
@@ -88,8 +88,8 @@ export const invoiceOperations: INodeProperties[] = [
 			{
 				name: 'PDF',
 				value: 'pdf',
-				description: 'Retrieves an invoice as a PDF',
-				action: '',
+				description: 'Download an invoice as a PDF',
+				action: 'Download an invoice as a PDF',
 				routing: {
 					request: { method: 'GET', url: '=/income/invoices/{{$parameter["invoiceId"]}}/pdf', encoding: 'arraybuffer', json: false },
 					output: {
@@ -101,7 +101,7 @@ export const invoiceOperations: INodeProperties[] = [
 				name: 'Unarchive',
 				value: 'unarchive',
 				description: 'Unarchive an invoice',
-				action: '',
+				action: 'Unarchive an invoice',
 				routing: {
 					request: { method: 'POST', url: '=/income/invoices/{{$parameter["invoiceId"]}}/unarchive' },
 				},

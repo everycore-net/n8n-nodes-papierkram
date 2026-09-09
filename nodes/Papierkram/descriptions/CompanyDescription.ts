@@ -16,7 +16,7 @@ export const companyOperations: INodeProperties[] = [
 				name: 'Archive',
 				value: 'archive',
 				description: 'Archive a company',
-				action: '',
+				action: 'Archive a company',
 				routing: {
 					request: { method: 'POST', url: '=/contact/companies/{{$parameter["companyId"]}}/archive' },
 				},
@@ -71,7 +71,7 @@ export const companyOperations: INodeProperties[] = [
 				name: 'Unarchive',
 				value: 'unarchive',
 				description: 'Unarchive a company',
-				action: '',
+				action: 'Unarchive a company',
 				routing: {
 					request: { method: 'POST', url: '=/contact/companies/{{$parameter["companyId"]}}/unarchive' },
 				},

@@ -16,7 +16,7 @@ export const estimateOperations: INodeProperties[] = [
 				name: 'Archive',
 				value: 'archive',
 				description: 'Archive an estimate',
-				action: '',
+				action: 'Archive an estimate',
 				routing: {
 					request: { method: 'POST', url: '=/income/estimates/{{$parameter["estimateId"]}}/archive' },
 				},
@@ -25,7 +25,7 @@ export const estimateOperations: INodeProperties[] = [
 				name: 'Cancel',
 				value: 'cancel',
 				description: 'Cancel an estimate',
-				action: '',
+				action: 'Cancel an estimate',
 				routing: {
 					request: { method: 'POST', url: '=/income/estimates/{{$parameter["estimateId"]}}/cancel' },
 				},
@@ -52,7 +52,7 @@ export const estimateOperations: INodeProperties[] = [
 				name: 'Deliver',
 				value: 'deliver',
 				description: 'Deliver an estimate',
-				action: '',
+				action: 'Deliver an estimate',
 				routing: {
 					request: { method: 'POST', url: '=/income/estimates/{{$parameter["estimateId"]}}/deliver' },
 				},
@@ -88,8 +88,8 @@ export const estimateOperations: INodeProperties[] = [
 			{
 				name: 'PDF',
 				value: 'pdf',
-				description: 'Retrieves an estimate as a PDF',
-				action: '',
+				description: 'Download an estimate as a PDF',
+				action: 'Download an estimate as a PDF',
 				routing: {
 					request: { method: 'GET', url: '=/income/estimates/{{$parameter["estimateId"]}}/pdf', encoding: 'arraybuffer', json: false },
 					output: {
@@ -101,7 +101,7 @@ export const estimateOperations: INodeProperties[] = [
 				name: 'Unarchive',
 				value: 'unarchive',
 				description: 'Unarchive an estimate',
-				action: '',
+				action: 'Unarchive an estimate',
 				routing: {
 					request: { method: 'POST', url: '=/income/estimates/{{$parameter["estimateId"]}}/unarchive' },
 				},

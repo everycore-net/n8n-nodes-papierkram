@@ -16,7 +16,7 @@ export const timeEntryOperations: INodeProperties[] = [
 				name: 'Archive',
 				value: 'archive',
 				description: 'Archive a time entry',
-				action: '',
+				action: 'Archive a time entry',
 				routing: {
 					request: { method: 'POST', url: '=/tracker/time_entries/{{$parameter["timeEntryId"]}}/archive' },
 				},
@@ -71,7 +71,7 @@ export const timeEntryOperations: INodeProperties[] = [
 				name: 'Unarchive',
 				value: 'unarchive',
 				description: 'Unarchive a time entry',
-				action: '',
+				action: 'Unarchive a time entry',
 				routing: {
 					request: { method: 'POST', url: '=/tracker/time_entries/{{$parameter["timeEntryId"]}}/unarchive' },
 				},

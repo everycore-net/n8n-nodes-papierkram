@@ -16,7 +16,7 @@ export const voucherOperations: INodeProperties[] = [
 				name: 'Archive',
 				value: 'archive',
 				description: 'Archive a voucher',
-				action: '',
+				action: 'Archive a voucher',
 				routing: {
 					request: { method: 'POST', url: '=/expense/vouchers/{{$parameter["voucherId"]}}/archive' },
 				},
@@ -25,16 +25,16 @@ export const voucherOperations: INodeProperties[] = [
 				name: 'Cancel',
 				value: 'cancel',
 				description: 'Cancel a voucher',
-				action: '',
+				action: 'Cancel a voucher',
 				routing: {
 					request: { method: 'POST', url: '=/expense/vouchers/{{$parameter["voucherId"]}}/cancel' },
 				},
 			},
 			{
-				name: 'CancelWithReverseEntry',
+				name: 'Cancel With Reverse Entry',
 				value: 'cancelWithReverseEntry',
 				description: 'Cancel a voucher with reverse entry ("Generalumkehr")',
-				action: ')',
+				action: 'Cancel a voucher with reverse entry',
 				routing: {
 					request: { method: 'POST', url: '=/expense/vouchers/{{$parameter["voucherId"]}}/cancel_with_reverse_entry' },
 				},
@@ -89,7 +89,7 @@ export const voucherOperations: INodeProperties[] = [
 				name: 'Pay',
 				value: 'pay',
 				description: 'Mark a voucher as paid',
-				action: '',
+				action: 'Mark a voucher as paid',
 				routing: {
 					request: { method: 'POST', url: '=/expense/vouchers/{{$parameter["voucherId"]}}/pay' },
 				},
@@ -97,8 +97,8 @@ export const voucherOperations: INodeProperties[] = [
 			{
 				name: 'PDF',
 				value: 'pdf',
-				description: 'Retrieves an expense voucher as a PDF',
-				action: '',
+				description: 'Download a voucher as a PDF',
+				action: 'Download a voucher as a PDF',
 				routing: {
 					request: { method: 'GET', url: '=/expense/vouchers/{{$parameter["voucherId"]}}/pdf', encoding: 'arraybuffer', json: false },
 					output: {
@@ -110,7 +110,7 @@ export const voucherOperations: INodeProperties[] = [
 				name: 'Unarchive',
 				value: 'unarchive',
 				description: 'Unarchive a voucher',
-				action: '',
+				action: 'Unarchive a voucher',
 				routing: {
 					request: { method: 'POST', url: '=/expense/vouchers/{{$parameter["voucherId"]}}/unarchive' },
 				},

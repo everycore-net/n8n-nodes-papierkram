@@ -16,7 +16,7 @@ export const propositionOperations: INodeProperties[] = [
 				name: 'Archive',
 				value: 'archive',
 				description: 'Archive a proposition',
-				action: '',
+				action: 'Archive a proposition',
 				routing: {
 					request: { method: 'POST', url: '=/income/propositions/{{$parameter["propositionId"]}}/archive' },
 				},
@@ -71,7 +71,7 @@ export const propositionOperations: INodeProperties[] = [
 				name: 'Unarchive',
 				value: 'unarchive',
 				description: 'Unarchive a proposition',
-				action: '',
+				action: 'Unarchive a proposition',
 				routing: {
 					request: { method: 'POST', url: '=/income/propositions/{{$parameter["propositionId"]}}/unarchive' },
 				},

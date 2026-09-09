@@ -4,6 +4,19 @@ All notable changes to this package are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the versions follow
 [semantic versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.2.1 — 2026-09-09
+
+### Fixed
+
+- Six actions had no label in the node's action list — Archive, Cancel, Pay, PDF and Unarchive
+  showed an icon and nothing else, and Cancel With Reverse Entry showed a lone . A regular
+  expression in the generator lost its backslashes during an edit, turning "strip a parenthetical
+  aside" into "delete everything up to the first bracket".
+- Operation names now split camel case, so the dropdown reads *Cancel With Reverse Entry* rather
+  than *CancelWithReverseEntry*.
+- The PDF action reads *Download an invoice as a PDF* instead of the specification's descriptive
+  *Retrieves an invoice as a PDF* — every other row in that list is an instruction.
+
 ## 0.2.0 — 2026-09-09
 
 ### Changed

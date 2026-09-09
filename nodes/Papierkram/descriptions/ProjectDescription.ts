@@ -16,7 +16,7 @@ export const projectOperations: INodeProperties[] = [
 				name: 'Archive',
 				value: 'archive',
 				description: 'Archive a project',
-				action: '',
+				action: 'Archive a project',
 				routing: {
 					request: { method: 'POST', url: '=/projects/{{$parameter["projectId"]}}/archive' },
 				},
@@ -71,7 +71,7 @@ export const projectOperations: INodeProperties[] = [
 				name: 'Unarchive',
 				value: 'unarchive',
 				description: 'Unarchive a project',
-				action: '',
+				action: 'Unarchive a project',
 				routing: {
 					request: { method: 'POST', url: '=/projects/{{$parameter["projectId"]}}/unarchive' },
 				},

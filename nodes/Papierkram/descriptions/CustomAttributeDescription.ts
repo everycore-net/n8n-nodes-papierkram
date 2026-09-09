@@ -16,7 +16,7 @@ export const customAttributeOperations: INodeProperties[] = [
 				name: 'Archive',
 				value: 'archive',
 				description: 'Archive a custom attribute',
-				action: '',
+				action: 'Archive a custom attribute',
 				routing: {
 					request: { method: 'POST', url: '=/settings/custom_attributes/{{$parameter["customAttributeId"]}}/archive' },
 				},
@@ -71,7 +71,7 @@ export const customAttributeOperations: INodeProperties[] = [
 				name: 'Unarchive',
 				value: 'unarchive',
 				description: 'Unarchive a custom attribute',
-				action: '',
+				action: 'Unarchive a custom attribute',
 				routing: {
 					request: { method: 'POST', url: '=/settings/custom_attributes/{{$parameter["customAttributeId"]}}/unarchive' },
 				},
