@@ -60,13 +60,23 @@ through `POST /rest/workflows/:id/activate` and needs the `versionId` it last ha
 webhook in `lastNode` mode returns only the first item unless `responseData` says otherwise — which
 makes any item count meaningless and hands back a PDF as JSON.
 
-### 2. Trigger
+### 2. Trigger — done on 9 September 2026
 
-- [ ] Manual execution shows the newest records and does **not** move the watermark.
-- [ ] Activate, create a record in Papierkram, wait for the poll → exactly the new record, once.
-- [ ] Deactivate and reactivate → no replay of old records.
-- [ ] *Trigger On: New and Updated Records* on a company: edit the company, and the poll picks the
-      edit up. On invoices the option must not appear at all.
+`tools/live-trigger-check.mjs` activates a one-minute poll on companies, waits out the first poll,
+creates a company, waits for the next one and deletes everything again. It runs for about three
+minutes, because that is how long the thing under test takes.
+
+- [x] The first poll adopts the account's state and produces **no execution** — activating a
+      workflow does not replay the account into it.
+- [x] The company created afterwards produced exactly **one** execution, status success, carrying
+      that company's ID and name.
+- [x] **One** record in the payload, not the other 20: the watermark holds.
+
+Still worth a look by hand, since neither is a matter of logic:
+
+- [ ] Manual execution in the editor shows the newest records without moving the watermark.
+- [ ] *Trigger On: New and Updated Records* on a company: edit it, and the poll picks the edit up.
+      On invoices, estimates and vouchers the option must not appear at all.
 
 ### 3. The writing endpoints
 

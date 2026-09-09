@@ -153,12 +153,19 @@ try {
 
 	if (fired.length > 0) {
 		const detail = await rest('GET', `/rest/executions/${fired[0].id}`);
-		const body = detail.body?.data ?? detail.body;
-		const items =
-			body?.data?.resultData?.runData?.['Papierkram Trigger']?.[0]?.data?.main?.[0] ?? [];
-		console.log(`   execution ${fired[0].id}: status ${fired[0].status}, ${items.length} item(s)`);
-		console.log(`   ids delivered: ${items.map((item) => item.json?.id).join(',') || '-'}`);
-		console.log(`   matches the new company: ${items.some((item) => item.json?.id === created.companyId)}`);
+		// n8n serialises run data with flatted and hands it back as a JSON string
+		// *inside* the JSON response, so it arrives with every quote escaped and
+		// its objects turned into an index table. Searching the flattened text is
+		// enough for the one question that matters — did this record come through
+		// — as long as the escaping is undone first.
+		const raw = JSON.stringify(detail.body ?? {}).replace(/\\"/g, '"');
+		const hasId = raw.includes(`"id":${created.companyId}`);
+		const hasName = raw.includes('API-Test n8n Trigger');
+		console.log(`   execution ${fired[0].id}: status ${fired[0].status}`);
+		console.log(`   carries the new company id ${created.companyId}: ${hasId}`);
+		console.log(`   carries its name: ${hasName}`);
+		const others = (raw.match(/"contact_type"/g) ?? []).length;
+		console.log(`   companies in the payload: ${others} ${others === 1 ? '(only the new one)' : '(more than the new one — the watermark is leaking)'}`);
 	} else {
 		console.log('   nothing fired — the watermark or the poll interval is wrong');
 	}
