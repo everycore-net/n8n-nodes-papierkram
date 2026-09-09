@@ -32,6 +32,11 @@ import type {
  * free-form string with no list of accepted fields, and an unknown one answers
  * 500. If the records do not come back in descending order, the poll walks the
  * pages instead of quietly skipping records.
+ *
+ * Two cases never page at all, because paging there would buy nothing and cost
+ * credits: a manual execution, which only ever shows the first few records, and
+ * the first automatic poll, whose only job is to remember where "now" is — with
+ * the newest record first, that is the first row of the first page.
  */
 
 interface ResourceDefinition {
@@ -58,6 +63,8 @@ const UPDATABLE = Object.entries(RESOURCES)
 
 const PAGE_SIZE = 100;
 const MAX_PAGES = 20;
+/** A manual execution is for looking at the shape of the data, not for volume. */
+const MANUAL_PREVIEW = 10;
 
 export class PapierkramTrigger implements INodeType {
 	description: INodeTypeDescription = {
@@ -204,6 +211,23 @@ export class PapierkramTrigger implements INodeType {
 		const firstEntries = entriesOf(first);
 		const sortHolds = firstEntries.length > 0 && isDescending(firstEntries);
 
+		// A manual execution is a look, not a poll: show the newest records and
+		// leave the watermark alone. Paging first would be pure waste, since only
+		// the first few are ever shown.
+		if (this.getMode() === 'manual') {
+			return firstEntries.length === 0
+				? null
+				: [this.helpers.returnJsonArray(firstEntries.slice(0, MANUAL_PREVIEW))];
+		}
+
+		// First automatic poll: adopt the current state rather than replay the
+		// account into the workflow. With the newest record first that is one
+		// request — and it is the common case, since Papierkram does sort.
+		if (known === 0 && sortHolds) {
+			staticData[watermarkKey] = rank(firstEntries[0]);
+			return null;
+		}
+
 		const newer: IDataObject[] = firstEntries.filter((entry) => rank(entry) > known);
 		let page = 1;
 		let hasMore = first.has_more === true;
@@ -239,17 +263,10 @@ export class PapierkramTrigger implements INodeType {
 			}
 		}
 
-		if (this.getMode() === 'manual') {
-			// A manual execution shows what the trigger sees without consuming the
-			// records: the watermark stays where it is.
-			const preview = firstEntries.length > 0 ? firstEntries : newer;
-			return preview.length === 0 ? null : [this.helpers.returnJsonArray(preview.slice(0, 10))];
-		}
-
 		staticData[watermarkKey] = newer.reduce((highest, entry) => Math.max(highest, rank(entry)), known);
 
-		// First automatic poll: adopt the current state instead of replaying the
-		// whole account into the workflow.
+		// An unsorted first poll had to be walked to find the true high-water mark,
+		// and everything it saw is by definition old.
 		if (known === 0 || newer.length === 0) return null;
 
 		newer.sort((left, right) => rank(left) - rank(right));
