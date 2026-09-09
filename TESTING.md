@@ -11,8 +11,13 @@ binary handling and the trigger's static data live in the runtime, not in the AP
 Use a demo or test account for the write steps.
 
 ```bash
+npm test        # the trigger's logic, no network
 npm run dev     # starts n8n with the node linked in
 ```
+
+`npm test` covers what does not need an account: the watermark, the paging decisions and the request
+count per poll. Everything below needs a real system, which is why it is a checklist and not a test
+suite.
 
 ## Confirmed against the API — 9 September 2026
 
@@ -47,6 +52,9 @@ webhook workflow, drives them, and deletes both again:
 - [x] *Invoice → Get Many*, limit 5 → five items, one invoice per item, no envelope around them.
 - [x] Return All → all 20 companies, so the `has_more` pagination expression works.
 - [x] *Invoice → PDF* → `application/pdf`, 63 kB, magic `%PDF`.
+- [x] *Invoice → Create* **through the node**: the nested `Customer ID` arrives as `customer.id`,
+      the positions arrive as a JSON array, `document_date` is set — read back over the API, because
+      the node's own answer would only prove that something was accepted.
 - [x] Voucher document upload **through the node**: create voucher → invoice PDF → upload → read
       back reports one attached document. This is the multipart path over n8n's own HTTP layer,
       which the API-level check could not cover.

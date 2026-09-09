@@ -55,7 +55,10 @@ limit becomes `page_size`, so asking for 10 invoices costs one request for 10 re
 
 **PDF** puts the document in the binary property `data`.
 
-The node is marked `usableAsTool`, so n8n also offers it as **Papierkram Tool** to AI agent nodes.
+The node is marked `usableAsTool`, so n8n also registers it as **Papierkram Tool**: an AI Agent can
+read customers, look up projects, book a time entry or draft an invoice without a workflow being
+wired for each case. The same permissions and the same credit budget apply — an agent that polls in
+a loop spends the account's month.
 
 Verified against n8n **2.35.5** and a live account on 9 September 2026 — see [TESTING.md](TESTING.md)
 for what was checked and what the API does that its own specification does not mention.
@@ -82,6 +85,19 @@ rather than offering something it cannot deliver.
 The first automatic poll adopts the current state and emits nothing, so switching a workflow on does
 not replay the whole account. A manual execution shows the newest records without moving the
 watermark.
+
+## Examples
+
+Ready to import, in [`examples/`](examples):
+
+| Workflow | What it shows |
+| --- | --- |
+| [`create-invoice.json`](examples/create-invoice.json) | Webhook → *Invoice: Create* → *Invoice: PDF*. Nested customer, positions as JSON, and the two fields the API specification gets wrong. |
+| [`watch-new-companies.json`](examples/watch-new-companies.json) | Trigger in *New and Updated Records* mode, filtered to customers. Explains which resources can do "updated" at all. |
+| [`voucher-from-email-attachment.json`](examples/voucher-from-email-attachment.json) | IMAP → *Voucher: Create* → *Voucher Document: Create*. The receipt from the mailbox ends up on the Beleg. |
+
+Each carries a sticky note with the account-specific values it needs, because those are exactly what
+a copied workflow gets wrong on the first run.
 
 ## What the API cannot do
 
@@ -113,9 +129,18 @@ this node:
 npm install
 npm run generate   # rebuild the property descriptions from the OpenAPI document
 npm run lint
+npm test           # unit tests for the trigger's watermark and paging logic
 npm run build
 npm run dev        # n8n with this node linked in
 ```
+
+The trigger is the only part with logic worth unit-testing, and its contract is about cost as much
+as correctness — a poll that finds nothing must not spend a page of API credits. `test/` drives it
+through a fake `IPollFunctions` that counts requests, so those assertions are possible at all.
+
+Two scripts in `tools/` go further and talk to real systems — `live-write-check.mjs` against the API,
+`live-n8n-check.mjs` and `live-trigger-check.mjs` against a running n8n. They create what they need
+and delete it again; see [TESTING.md](TESTING.md).
 
 `nodes/Papierkram/descriptions/*.ts` is **generated** from `openapi/papierkram-v1.json` by
 `tools/generate-descriptions.mjs`. Do not edit those files: change the generator or refresh the

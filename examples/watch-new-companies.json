@@ -1,0 +1,68 @@
+{
+  "name": "Papierkram — auf neue und geänderte Unternehmen reagieren",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": { "item": [{ "mode": "everyHour" }] },
+        "resource": "company",
+        "mode": "updated"
+      },
+      "id": "3f7a1b10-0002-4000-8000-000000000001",
+      "name": "Papierkram Trigger",
+      "type": "n8n-nodes-papierkram.papierkramTrigger",
+      "typeVersion": 1,
+      "position": [-220, 0]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "version": 2 },
+          "conditions": [
+            {
+              "id": "3f7a1b10-0002-4000-8000-00000000000b",
+              "leftValue": "={{ $json.contact_type }}",
+              "rightValue": "customer",
+              "operator": { "type": "string", "operation": "equals" }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "3f7a1b10-0002-4000-8000-000000000002",
+      "name": "Nur Kunden",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [0, 0]
+    },
+    {
+      "parameters": {},
+      "id": "3f7a1b10-0002-4000-8000-000000000003",
+      "name": "Hier weiterverarbeiten",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [220, -80]
+    },
+    {
+      "parameters": {
+        "content": "## Neue und geänderte Unternehmen\n\n**Trigger On** steht auf *New and Updated Records*. Das geht nur bei Ressourcen, die `updated_at` mitliefern: Unternehmen, Projekte, Waren/Dienstleistungen, Aufgaben, Zeiterfassung und Banktransaktionen.\n\nBei **Rechnungen, Angeboten und Belegen gibt es das Feld nicht** — dort sieht der Trigger nur neue Datensätze, und die Option wird gar nicht erst angeboten.\n\nDer erste Lauf nach dem Aktivieren merkt sich nur den Stand und löst nichts aus. Das ist Absicht: sonst liefe beim Einschalten das ganze Konto durch den Workflow.\n\nJeder Poll kostet API-Credits aus dem Monatsbudget des Kontos, auch wenn er nichts findet. Stündlich ist für Stammdaten meist reichlich.",
+        "height": 400,
+        "width": 420
+      },
+      "id": "3f7a1b10-0002-4000-8000-000000000004",
+      "name": "Hinweise",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-220, 160]
+    }
+  ],
+  "connections": {
+    "Papierkram Trigger": {
+      "main": [[{ "node": "Nur Kunden", "type": "main", "index": 0 }]]
+    },
+    "Nur Kunden": {
+      "main": [[{ "node": "Hier weiterverarbeiten", "type": "main", "index": 0 }], []]
+    }
+  },
+  "settings": { "executionOrder": "v1" },
+  "pinData": {}
+}

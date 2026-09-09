@@ -1,0 +1,71 @@
+{
+  "name": "Papierkram — Rechnung aus einem Webhook anlegen",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "papierkram-invoice",
+        "httpMethod": "POST",
+        "responseMode": "lastNode",
+        "responseData": "allEntries"
+      },
+      "id": "3f7a1b10-0001-4000-8000-000000000001",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [-220, 0],
+      "webhookId": "3f7a1b10-0001-4000-8000-00000000000a"
+    },
+    {
+      "parameters": {
+        "resource": "invoice",
+        "operation": "create",
+        "name": "={{ $json.betreff }}",
+        "lineItems": "={{ JSON.stringify($json.positionen) }}",
+        "additionalFields": {
+          "customerId": "={{ $json.kundeId }}",
+          "documentDate": "={{ $now.format('yyyy-MM-dd') }}",
+          "paymentTermId": 1
+        }
+      },
+      "id": "3f7a1b10-0001-4000-8000-000000000002",
+      "name": "Rechnung anlegen",
+      "type": "n8n-nodes-papierkram.papierkram",
+      "typeVersion": 1,
+      "position": [0, 0]
+    },
+    {
+      "parameters": {
+        "resource": "invoice",
+        "operation": "pdf",
+        "invoiceId": "={{ $json.id }}"
+      },
+      "id": "3f7a1b10-0001-4000-8000-000000000003",
+      "name": "PDF holen",
+      "type": "n8n-nodes-papierkram.papierkram",
+      "typeVersion": 1,
+      "position": [220, 0]
+    },
+    {
+      "parameters": {
+        "content": "## Rechnung anlegen\n\nDer Webhook erwartet:\n\n```json\n{\n  \"betreff\": \"Beratung September\",\n  \"kundeId\": 6,\n  \"positionen\": [\n    { \"name\": \"Beratung\", \"quantity\": 8, \"unit\": \"Stunde\", \"price\": 120, \"vat_rate\": \"19%\" }\n  ]\n}\n```\n\n**vat_rate ist keine Prozentzahl**, sondern der Name des Steuersatzes, wie er im Konto konfiguriert ist — `19%`, oder `0% Ohne USt (Kleinunternehmer)`. Kein Endpunkt liefert die gültigen Namen; die einfachste Quelle ist eine bestehende Rechnung.\n\n**Document Date ist Pflicht**, auch wenn die API-Doku es als optional führt.\n\nDie Rechnung entsteht als Entwurf und hat noch keine Nummer. Zum Versenden danach *Invoice → Deliver* anhängen.",
+        "height": 460,
+        "width": 420
+      },
+      "id": "3f7a1b10-0001-4000-8000-000000000004",
+      "name": "Hinweise",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-220, 160]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [[{ "node": "Rechnung anlegen", "type": "main", "index": 0 }]]
+    },
+    "Rechnung anlegen": {
+      "main": [[{ "node": "PDF holen", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": { "executionOrder": "v1" },
+  "pinData": {}
+}

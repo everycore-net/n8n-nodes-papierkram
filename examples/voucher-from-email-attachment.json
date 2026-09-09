@@ -1,0 +1,69 @@
+{
+  "name": "Papierkram — Beleg aus einem E-Mail-Anhang",
+  "nodes": [
+    {
+      "parameters": {
+        "postProcessAction": "nothing",
+        "downloadAttachments": true,
+        "options": {}
+      },
+      "id": "3f7a1b10-0003-4000-8000-000000000001",
+      "name": "E-Mail (IMAP)",
+      "type": "n8n-nodes-base.emailReadImap",
+      "typeVersion": 2,
+      "position": [-220, 0]
+    },
+    {
+      "parameters": {
+        "resource": "voucher",
+        "operation": "create",
+        "name": "={{ $json.subject }}",
+        "provenance": "domestic",
+        "lineItems": "={{ JSON.stringify([{ name: $json.subject, amount: 0, vat_rate: '19%', category: 'Bürobedarf' }]) }}",
+        "additionalFields": {
+          "documentDate": "={{ $now.format('yyyy-MM-dd') }}"
+        }
+      },
+      "id": "3f7a1b10-0003-4000-8000-000000000002",
+      "name": "Beleg anlegen",
+      "type": "n8n-nodes-papierkram.papierkram",
+      "typeVersion": 1,
+      "position": [0, 0]
+    },
+    {
+      "parameters": {
+        "resource": "voucherDocument",
+        "operation": "create",
+        "voucherId": "={{ $json.id }}",
+        "binaryPropertyName": "attachment_0"
+      },
+      "id": "3f7a1b10-0003-4000-8000-000000000003",
+      "name": "Anhang hochladen",
+      "type": "n8n-nodes-papierkram.papierkram",
+      "typeVersion": 1,
+      "position": [220, 0]
+    },
+    {
+      "parameters": {
+        "content": "## Beleg aus einem E-Mail-Anhang\n\nDer IMAP-Trigger muss **Download Attachments** an haben; die Datei liegt dann in `attachment_0`. Bei Gmail heißt das Feld je nach Node-Einstellung anders — der Name gehört in *Input Binary Field*.\n\nDie Reihenfolge ist wichtig: erst der Beleg, dann der Anhang. Die ID aus dem ersten Schritt geht als *Voucher ID* in den zweiten.\n\n`category` und `vat_rate` sind kontospezifische **Namen**, keine Codes oder Prozentzahlen. Die gültigen Werte stehen an einem bestehenden Beleg — einmal *Voucher → Get Many* ausführen und in `line_items` nachsehen.\n\nDer Betrag steht hier auf 0: den echten Wert liefert entweder eine OCR-Strecke davor oder die Nachbearbeitung in Papierkram.",
+        "height": 420,
+        "width": 420
+      },
+      "id": "3f7a1b10-0003-4000-8000-000000000004",
+      "name": "Hinweise",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-220, 160]
+    }
+  ],
+  "connections": {
+    "E-Mail (IMAP)": {
+      "main": [[{ "node": "Beleg anlegen", "type": "main", "index": 0 }]]
+    },
+    "Beleg anlegen": {
+      "main": [[{ "node": "Anhang hochladen", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": { "executionOrder": "v1" },
+  "pinData": {}
+}

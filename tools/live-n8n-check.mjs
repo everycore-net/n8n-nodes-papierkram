@@ -137,7 +137,13 @@ const uploadWorkflow = (credentialId, invoiceId, lineItems) => {
 	};
 };
 
-const created = { credentialId: null, workflowId: null, voucherId: null };
+const created = { credentialId: null, workflowId: null, voucherId: null, invoiceId: null };
+
+/** Reads what an account-specific value has to look like off an existing record. */
+const papierkramGet = async (path) =>
+	(await fetch(`https://${PAPIERKRAM_ACCOUNT}.papierkram.de/api/v1${path}`, {
+		headers: { Accept: 'application/json', Authorization: `Bearer ${PAPIERKRAM_TOKEN}` },
+	})).json();
 
 /** Deleting needs archiving first, which is new in n8n 2.x. */
 const removeWorkflow = async (id) => {
@@ -268,6 +274,42 @@ try {
 		console.log(`--- PDF of invoice ${invoiceId}`);
 		await run('pdf', { resource: 'invoice', operation: 'pdf', invoiceId: String(invoiceId) }, true);
 	}
+	console.log('--- Create through the node, with a nested field and a JSON array');
+	{
+		const terms = await papierkramGet('/income/payment_terms?page=1&page_size=1');
+		const companies = await papierkramGet('/contact/companies?page=1&page_size=50');
+		const customer = (companies.entries ?? []).find((entry) => entry.contact_type === 'customer');
+		const sample = await papierkramGet(`/income/invoices/${invoiceId}`);
+		const vatRate = sample.line_items?.[0]?.vat_rate;
+
+		const result = await run('create invoice', {
+			resource: 'invoice',
+			operation: 'create',
+			name: 'API-Test n8n node create',
+			lineItems: JSON.stringify([
+				{ name: 'Beratung', quantity: 1, unit: 'Stunde', price: 100, vat_rate: vatRate },
+			]),
+			additionalFields: {
+				paymentTermId: terms.entries?.[0]?.id,
+				customerId: customer?.id,
+				documentDate: new Date().toISOString().slice(0, 10),
+			},
+		});
+
+		const invoice = (Array.isArray(result) ? result[0] : result) ?? {};
+		if (invoice.message !== undefined) {
+			console.log(`   ! ${invoice.message}`);
+		} else {
+			created.invoiceId = invoice.id;
+			// Read it back over the API: the node's own answer would prove only that
+			// something was accepted, not what was stored.
+			const stored = await papierkramGet(`/income/invoices/${invoice.id}`);
+			console.log(`   invoice ${invoice.id}: state ${stored.state}, document_date ${stored.document_date}`);
+			console.log(`   customer.id arrived: ${stored.billing?.company ? 'yes' : 'NO — the nested body property did not survive the routing'}`);
+			console.log(`   positions: ${stored.line_items?.length ?? 0}, net ${stored.total_net}`);
+		}
+	}
+
 	if (invoiceId !== undefined) {
 		console.log('--- multipart upload through the node');
 		const sample = await fetch(`https://${PAPIERKRAM_ACCOUNT}.papierkram.de/api/v1/expense/vouchers?page=1&page_size=1`, {
@@ -298,6 +340,13 @@ try {
 	if (created.credentialId !== null) {
 		const removed = await rest('DELETE', `/rest/credentials/${created.credentialId}`);
 		console.log(`   credential ${created.credentialId}: HTTP ${removed.status}`);
+	}
+	if (created.invoiceId) {
+		const removed = await fetch(
+			`https://${PAPIERKRAM_ACCOUNT}.papierkram.de/api/v1/income/invoices/${created.invoiceId}`,
+			{ method: 'DELETE', headers: { Accept: 'application/json', Authorization: `Bearer ${PAPIERKRAM_TOKEN}` } },
+		);
+		console.log(`   invoice ${created.invoiceId}: delete HTTP ${removed.status}`);
 	}
 	if (created.voucherId) {
 		const removed = await fetch(
