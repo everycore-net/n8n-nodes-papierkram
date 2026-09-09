@@ -65,10 +65,16 @@ jobs:
       - name: Build
         run: npm run build
 
+      # package.json keeps a prepublishOnly hook that refuses a plain npm
+      # publish and points at `npm run release` instead. That guard is worth
+      # having against an accidental publish from a laptop, and RELEASE_MODE is
+      # its own escape hatch - the same one `n8n-node release` sets. Removing
+      # the hook would have been the other way to get past it, and the worse one.
       - name: Publish
         run: npm publish --provenance --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          RELEASE_MODE: 'true'
 
       # The scanner resolves a package by name from the registry, so it cannot
       # look at a tarball and cannot run before the publish - it would 404 and
