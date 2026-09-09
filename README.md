@@ -62,13 +62,21 @@ from an earlier node produces anyway.
 
 ### Papierkram Trigger
 
-Polls one resource and starts the workflow for records that appeared since the last run.
+Polls one resource and starts the workflow for records that appeared — or changed — since the last
+run. Papierkram has no webhooks, so polling is the only way in.
 
-Papierkram has no webhooks and no "changed since" filter, so the watermark is the highest ID seen
-so far. That makes it a **new record** trigger: editing an existing invoice does not change its ID
-and does not fire it. The first automatic poll adopts the current state and emits nothing, so
-switching the workflow on does not replay the whole account. A manual execution shows the newest
-records without moving the watermark.
+| Trigger on | Watermark | Available for |
+| --- | --- | --- |
+| New Records | highest ID seen | every resource |
+| New and Updated Records | newest `updated_at` seen | bank transactions, companies, projects, propositions, tasks, time entries |
+
+Invoices, estimates and vouchers do not carry `updated_at` in the API, so for those the trigger can
+only ever see new records — an edit to an existing invoice is invisible. The node hides the option
+rather than offering something it cannot deliver.
+
+The first automatic poll adopts the current state and emits nothing, so switching a workflow on does
+not replay the whole account. A manual execution shows the newest records without moving the
+watermark.
 
 ## What the API cannot do
 
@@ -80,9 +88,13 @@ this node:
   `X-Remaining-Quota`; once the budget is spent the API answers **429** until the next month. A
   one-minute poll on several resources is a real budget decision, not a free knob.
 - There are **no webhooks**. Polling is the only way in.
-- `order_by` is documented as a free-form string with no list of accepted fields. The trigger asks
-  for `id`/`desc` and checks the answer: if the records do not come back in descending order, it
-  walks the pages instead and stops with a clear error rather than quietly missing records.
+- `order_by` is documented as a free-form string with no list of accepted fields. `id` and
+  `updated_at` work (verified against a live account on 9 September 2026); a field the endpoint does
+  not know answers **HTTP 500**, not a validation error. The trigger therefore checks that the
+  records really did come back in descending order and walks the pages if they did not.
+- **`updated_at` is missing on invoices, estimates and vouchers**, so changes to those cannot be
+  detected at all — see the trigger table above.
+- `page_size` is silently clamped to 100.
 - Filters are per endpoint and limited — mostly company, project and a date range. There is no
   full-text search.
 

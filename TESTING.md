@@ -1,65 +1,63 @@
 # Verifying against a live account
 
 The package builds and passes the n8n lint, and every field name in it comes out of the OpenAPI
-document rather than out of somebody's memory. What that does *not* prove is how the API behaves,
-and a few things in here rest on assumptions that only an account can settle. This is the list, in
-the order that matters.
+document rather than out of somebody's memory. What that does *not* prove is how the API behaves.
 
-Use a demo or test account: several of these steps write.
+Part of this list has been checked against a live account (everycore, package M) on **9 September
+2026**, directly over HTTP rather than through n8n. Those results are recorded below. What is still
+open is either a write, or something only n8n itself can exercise — the routing expressions, the
+binary handling and the trigger's static data live in the runtime, not in the API.
+
+Use a demo or test account for the write steps.
 
 ```bash
 npm run dev     # starts n8n with the node linked in
 ```
 
-## 1. Credentials
+## Confirmed against the API — 9 September 2026
 
-Create a **Papierkram API** credential and hit *Test*. It calls `GET /info`.
+- **Auth.** `GET /info` with a token from Einstellungen → API answers 200. A token from another
+  account answers 401 `"Der Access Token ist nicht gültig/korrekt"`, and a subdomain without a
+  Papierkram account answers the marketing site as HTML instead of JSON — worth recognising, because
+  the second case does not look like an error at all.
+- **Envelope.** List responses carry `type,page,page_size,total_pages,total_entries,has_more,entries`
+  — the names the node's pagination and `rootProperty` depend on.
+- **Paging.** 20 companies at `page_size=5` come back as four requests with `has_more` false on the
+  last. `page_size=250` is silently clamped to 100, so the node's Limit maximum of 100 is the real
+  ceiling.
+- **Cost.** One list request costs one credit; the account showed 9,641 of 10,000 credits left.
+- **Filters.** `document_date_range_start=2030-01-01` and `document_date_range_end=2020-01-01` both
+  narrow to 0 records, so date filters reach the query string and are applied.
+- **Sort order** — what the trigger stands on. `order_by=id&order_direction=desc` really does sort
+  descending, and so does `order_by=updated_at`. An unknown field answers **HTTP 500**, not a
+  validation error; the node's Order By description says so.
+- **`updated_at`.** Present on bank transactions, companies, projects, propositions, tasks and time
+  entries; **absent** on invoices, estimates and vouchers. Format is ISO 8601 with offset
+  (`2026-09-08T10:55:17.000+02:00`). This is what the trigger's two modes are built on.
+- **PDF.** `GET /income/invoices/{id}/pdf` answers `application/pdf`, ~50 kB, magic `%PDF`.
 
-- Fails with 401 → account name or token wrong.
-- Fails with 404 → check the account name; the token is only valid on its own subdomain.
+## Still open
 
-## 2. Get Many, paging and the limit
+### 1. The node inside n8n
 
-*Invoice → Get Many*, **Return All** off, limit 5.
+The API answers correctly; whether the declarative routing hands it on correctly is a different
+question, and only the runtime can settle it.
 
-- [ ] Five items arrive, one invoice per item, no `entries`/`total_pages` wrapper.
-- [ ] The request sent `page_size=5` (one page, five records — not a full page trimmed afterwards).
+- [ ] *Invoice → Get Many*, Return All off, limit 5 → five items, one invoice per item, no envelope
+      around them, and the request carried `page_size=5` rather than trimming afterwards.
+- [ ] Return All on, in an account with more than 100 records of that kind → everything arrives.
+- [ ] *Invoice → PDF* → the output item has binary data in `data` and it opens.
+- [ ] Credential test in the credential dialog.
 
-Then **Return All** on, in an account with more than 100 invoices.
+### 2. Trigger
 
-- [ ] Everything arrives. The pagination continues on `has_more` and raises `page`; if it stops at
-      100, the envelope does not carry `has_more` the way the spec's example shows.
+- [ ] Manual execution shows the newest records and does **not** move the watermark.
+- [ ] Activate, create a record in Papierkram, wait for the poll → exactly the new record, once.
+- [ ] Deactivate and reactivate → no replay of old records.
+- [ ] *Trigger On: New and Updated Records* on a company: edit the company, and the poll picks the
+      edit up. On invoices the option must not appear at all.
 
-## 3. Filters
-
-*Invoice → Get Many* with a **Document Date Range Start**.
-
-- [ ] The filter reaches the query string and narrows the result.
-- [ ] Date format: the spec types these as plain strings. Try `2026-01-01` first.
-
-## 4. Sort order — the one the trigger depends on
-
-*Invoice → Get Many*, **Options → Order By** `id`, **Order Direction** `desc`.
-
-- [ ] Records come back newest first.
-
-If they do not, `order_by` is either not supported for this endpoint or wants a different field
-name. The trigger detects that and falls back to walking every page, which costs credits; if the
-fallback is what actually happens, `ENDPOINTS`/the sort field in `PapierkramTrigger.node.ts` needs
-the field name that does work.
-
-## 5. Trigger
-
-Point *Papierkram Trigger* at **Invoice**.
-
-- [ ] Manual execution shows the newest invoices and does **not** move the watermark.
-- [ ] Activate, create an invoice in Papierkram, wait for the poll → exactly the new invoice
-      arrives, once.
-- [ ] Deactivate and reactivate → no replay of old invoices.
-- [ ] Editing an existing invoice does *not* fire it. That is by design, not a bug: Papierkram
-      offers nothing to detect changes with.
-
-## 6. Create with nested fields
+### 3. Create with nested fields — writes
 
 *Invoice → Create* with **Name**, **Payment Term ID** and **Line Items**:
 
@@ -71,19 +69,9 @@ Point *Papierkram Trigger* at **Invoice**.
 - [ ] `Customer ID` from *Additional Fields* lands as `customer.id`, not as a flat `customer` — a
       wrong nesting shows up as a 422 with a German message, which the node passes through.
 
-## 7. PDF
+### 4. Voucher document upload — the least certain part
 
-*Invoice → PDF* on an existing invoice.
-
-- [ ] The output item has binary data in `data` and it opens as a PDF.
-
-A file that opens as garbage means the response was decoded as text on the way; the request sets
-`encoding: 'arraybuffer'` and `json: false` for exactly that reason, so check those first.
-
-## 8. Voucher document upload — the least certain part
-
-*Voucher Document → Create*, with an incoming item that carries a file in `data` (an HTTP Request
-node reading a PDF is enough).
+*Voucher Document → Create*, with an incoming item that carries a file in `data`.
 
 - [ ] The document is attached to the voucher.
 
@@ -91,10 +79,3 @@ This is the only endpoint that takes `multipart/form-data`. The node builds it i
 `nodes/Papierkram/GenericFunctions.ts` with the runtime's `FormData`/`Blob` and removes the JSON
 `Content-Type` so the boundary is generated. If the server answers 400 or 422 here, that helper is
 where to look — nothing else in the package touches multipart.
-
-## 9. Quota
-
-- [ ] After a few calls, check `X-Remaining-Quota` in the response headers of an *n8n → HTTP
-      Request* call, or Einstellungen → API in Papierkram, and get a feeling for what a poll
-      interval costs. 10,000 credits a month is roughly one request every four minutes, and that is
-      the whole budget for the account, not per workflow.

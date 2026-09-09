@@ -621,7 +621,7 @@ function generate(resource) {
 					type: 'string',
 					default: '',
 					description:
-						'Field to sort by. Only the fields the endpoint documents are accepted, and it only takes effect together with Order Direction',
+						'Field of the record to sort by, for example "id" or "updated_at". Takes effect only together with Order Direction, and a field the endpoint does not know answers with HTTP 500 rather than an error message.',
 				},
 				'\t\t\t',
 				"routing: { send: { property: 'order_by', type: 'query' } },",
