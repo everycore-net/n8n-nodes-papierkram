@@ -99,7 +99,7 @@ try {
 			{
 				id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
 				name: 'Papierkram Trigger',
-				type: '@everyc0re/n8n-nodes-papierkram.papierkramTrigger',
+				type: '@everycore/n8n-nodes-papierkram.papierkramTrigger',
 				typeVersion: 1,
 				position: [0, 0],
 				parameters: { pollTimes: { item: [{ mode: 'everyHour' }] }, resource: 'company', mode: 'created' },
@@ -143,7 +143,7 @@ try {
 			{
 				id: '88888888-8888-4888-8888-888888888888',
 				name: 'Papierkram Trigger',
-				type: '@everyc0re/n8n-nodes-papierkram.papierkramTrigger',
+				type: '@everycore/n8n-nodes-papierkram.papierkramTrigger',
 				typeVersion: 1,
 				position: [0, 0],
 				parameters: {

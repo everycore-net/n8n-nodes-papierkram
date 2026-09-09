@@ -48,7 +48,7 @@ suite.
 Checked in n8n **2.35.5** with `tools/live-n8n-check.mjs`, which builds a throwaway credential and a
 webhook workflow, drives them, and deletes both again:
 
-- [x] Both nodes register as `@everyc0re/n8n-nodes-papierkram.papierkram` and `.papierkramTrigger`,
+- [x] Both nodes register as `@everycore/n8n-nodes-papierkram.papierkram` and `.papierkramTrigger`,
       and n8n derives a third one — *Papierkram Tool* — from `usableAsTool`.
 - [x] *Trigger On* is offered for the six resources that carry `updated_at` and for none of the
       three that do not — read off the node description n8n actually serves, not off the source.

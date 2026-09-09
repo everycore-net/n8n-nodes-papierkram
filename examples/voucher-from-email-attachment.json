@@ -26,7 +26,7 @@
       },
       "id": "3f7a1b10-0003-4000-8000-000000000002",
       "name": "Beleg anlegen",
-      "type": "@everyc0re/n8n-nodes-papierkram.papierkram",
+      "type": "@everycore/n8n-nodes-papierkram.papierkram",
       "typeVersion": 1,
       "position": [0, 0]
     },
@@ -39,7 +39,7 @@
       },
       "id": "3f7a1b10-0003-4000-8000-000000000003",
       "name": "Anhang hochladen",
-      "type": "@everyc0re/n8n-nodes-papierkram.papierkram",
+      "type": "@everycore/n8n-nodes-papierkram.papierkram",
       "typeVersion": 1,
       "position": [220, 0]
     },

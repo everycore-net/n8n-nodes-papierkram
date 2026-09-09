@@ -9,7 +9,7 @@
       },
       "id": "3f7a1b10-0002-4000-8000-000000000001",
       "name": "Papierkram Trigger",
-      "type": "@everyc0re/n8n-nodes-papierkram.papierkramTrigger",
+      "type": "@everycore/n8n-nodes-papierkram.papierkramTrigger",
       "typeVersion": 1,
       "position": [-220, 0]
     },
