@@ -57,25 +57,26 @@ question, and only the runtime can settle it.
 - [ ] *Trigger On: New and Updated Records* on a company: edit the company, and the poll picks the
       edit up. On invoices the option must not appear at all.
 
-### 3. Create with nested fields — writes
+### 3. The writing endpoints
 
-*Invoice → Create* with **Name**, **Payment Term ID** and **Line Items**:
+Two things the OpenAPI document cannot answer: whether `customer: { id }` is really how a customer
+is attached to an invoice, and whether the document endpoint accepts a multipart body built the way
+`nodes/Papierkram/GenericFunctions.ts` builds it — no `Content-Type` of its own, boundary from the
+runtime. It is the only endpoint in the package that does not take JSON, so if anything breaks
+there, that helper is the only place to look.
 
-```json
-[{ "name": "Beratung", "quantity": 1, "unit": "Stunde", "price": 100, "vat_rate": 19 }]
+`tools/live-write-check.mjs` exercises both and deletes what it created in a `finally` block. It
+writes to whichever account the token belongs to; a draft invoice has no number yet, so removing it
+leaves no gap in the numbering, but a test account is still the better target.
+
+```bash
+PAPIERKRAM_ACCOUNT=meinefirma PAPIERKRAM_TOKEN=<token> node tools/live-write-check.mjs
 ```
 
-- [ ] The invoice appears with the position.
-- [ ] `Customer ID` from *Additional Fields* lands as `customer.id`, not as a flat `customer` — a
-      wrong nesting shows up as a 422 with a German message, which the node passes through.
+- [ ] Invoice: created, `billing.company` filled (the customer stuck), totals 100 / 19 / 119.
+- [ ] Voucher document: upload answers 2xx.
+- [ ] Cleanup: both read back as 404.
 
-### 4. Voucher document upload — the least certain part
-
-*Voucher Document → Create*, with an incoming item that carries a file in `data`.
-
-- [ ] The document is attached to the voucher.
-
-This is the only endpoint that takes `multipart/form-data`. The node builds it in
-`nodes/Papierkram/GenericFunctions.ts` with the runtime's `FormData`/`Blob` and removes the JSON
-`Content-Type` so the boundary is generated. If the server answers 400 or 422 here, that helper is
-where to look — nothing else in the package touches multipart.
+Passing the script is necessary but not sufficient for the node — it proves the API accepts the
+shapes, while the node still has to produce them through the declarative routing. Section 1 is where
+that gets settled.
