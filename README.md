@@ -94,7 +94,7 @@ Ready to import, in [`examples/`](examples):
 | --- | --- |
 | [`create-invoice.json`](examples/create-invoice.json) | Webhook → *Invoice: Create* → *Invoice: PDF*. Nested customer, positions as JSON, and the two fields the API specification gets wrong. |
 | [`watch-new-companies.json`](examples/watch-new-companies.json) | Trigger in *New and Updated Records* mode, filtered to customers. Explains which resources can do "updated" at all. |
-| [`voucher-from-email-attachment.json`](examples/voucher-from-email-attachment.json) | IMAP → *Voucher: Create* → *Voucher Document: Create*. The receipt from the mailbox ends up on the voucher. |
+| [`voucher-from-gmail-attachment.json`](examples/voucher-from-gmail-attachment.json) | Gmail → *Voucher: Create* → *Voucher Document: Create*. The receipt from the mailbox ends up on the voucher, and it shows why a Merge is needed to keep the attachment alive past the first API call. |
 
 Each carries a sticky note with the account-specific values it needs, because those are exactly what
 a copied workflow gets wrong on the first run.

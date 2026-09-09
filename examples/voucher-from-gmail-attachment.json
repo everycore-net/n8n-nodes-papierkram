@@ -1,0 +1,96 @@
+{
+  "name": "Papierkram — a voucher from a Gmail attachment",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": { "item": [{ "mode": "everyHour" }] },
+        "simple": false,
+        "filters": {
+          "q": "has:attachment filename:pdf",
+          "readStatus": "unread"
+        },
+        "options": {
+          "downloadAttachments": true
+        }
+      },
+      "id": "3f7a1b10-0003-4000-8000-000000000001",
+      "name": "Gmail Trigger",
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.4,
+      "position": [-260, 0]
+    },
+    {
+      "parameters": {
+        "resource": "voucher",
+        "operation": "create",
+        "name": "={{ $json.subject }}",
+        "provenance": "domestic",
+        "lineItems": "={{ JSON.stringify([{ name: $json.subject, amount: 0, vat_rate: '19%', category: 'Bürobedarf' }]) }}",
+        "additionalFields": {
+          "documentDate": "={{ $json.date.slice(0, 10) }}",
+          "description": "={{ 'Aus E-Mail von ' + $json.from.text }}"
+        }
+      },
+      "id": "3f7a1b10-0003-4000-8000-000000000002",
+      "name": "Create voucher",
+      "type": "n8n-nodes-papierkram.papierkram",
+      "typeVersion": 1,
+      "position": [-40, -60]
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "id": "3f7a1b10-0003-4000-8000-000000000005",
+      "name": "Merge",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [180, 0]
+    },
+    {
+      "parameters": {
+        "resource": "voucherDocument",
+        "operation": "create",
+        "voucherId": "={{ $('Create voucher').item.json.id }}",
+        "binaryPropertyName": "attachment_0"
+      },
+      "id": "3f7a1b10-0003-4000-8000-000000000003",
+      "name": "Upload attachment",
+      "type": "n8n-nodes-papierkram.papierkram",
+      "typeVersion": 1,
+      "position": [400, 0]
+    },
+    {
+      "parameters": {
+        "content": "## A voucher from a Gmail attachment\n\n### The email\n\nAnything with a PDF attached — a supplier invoice, a receipt, a subscription bill. The filter `has:attachment filename:pdf` on unread messages is a starting point; in practice a Gmail label works better: forward or file the relevant mail under `Belege` and filter on `label:belege has:attachment`.\n\nThe Gmail Trigger needs **Gmail OAuth2** credentials, and **Simplify must be off** — the simplified output has no attachments. With it off the mail arrives as `subject`, `from`, `date`, `text`, and each attachment as binary `attachment_0`, `attachment_1`, …\n\n### Why the Merge is there\n\nEach node hands on its own output, so the response of *Create voucher* replaces the mail item — and with it the PDF. The Merge brings the two back together: the voucher on one input, the mail with its attachment on the other. Without it, *Upload attachment* has no file to send.\n\nThe voucher ID is read as `$('Create voucher').item.json.id` rather than `$json.id`, because both items carry an `id` and the mail's would win.\n\n### What still needs deciding\n\n`vat_rate` and `category` are account-specific **names** spelled as Papierkram spells them — run *Voucher → Get Many* once and read them off `line_items`. The amount is 0: the real one comes from an OCR step before this, or from finishing the voucher in Papierkram. The document date is taken from the email, which is close but not the invoice date.",
+        "height": 620,
+        "width": 480
+      },
+      "id": "3f7a1b10-0003-4000-8000-000000000004",
+      "name": "Notes",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-260, 180]
+    }
+  ],
+  "connections": {
+    "Gmail Trigger": {
+      "main": [
+        [
+          { "node": "Create voucher", "type": "main", "index": 0 },
+          { "node": "Merge", "type": "main", "index": 1 }
+        ]
+      ]
+    },
+    "Create voucher": {
+      "main": [[{ "node": "Merge", "type": "main", "index": 0 }]]
+    },
+    "Merge": {
+      "main": [[{ "node": "Upload attachment", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": { "executionOrder": "v1" },
+  "pinData": {}
+}
