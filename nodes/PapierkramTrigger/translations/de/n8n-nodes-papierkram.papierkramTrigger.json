@@ -1,0 +1,24 @@
+{
+  "header": {
+    "displayName": "Papierkram Trigger",
+    "description": "Startet einen Workflow für Papierkram-Datensätze, die seit der letzten Abfrage neu sind oder sich geändert haben"
+  },
+  "nodeView.quotaNotice.displayName": "Jede Abfrage kostet Credits aus dem monatlichen API-Budget des Kontos, auch wenn sie nichts findet. Papierkram hat keine Webhooks, deshalb führt kein anderer Weg hinein.",
+  "nodeView.resource.displayName": "Ressource",
+  "nodeView.resource.description": "Welche Datensätze beobachtet werden",
+  "nodeView.resource.options.bankTransaction.name": "Kontoumsatz",
+  "nodeView.resource.options.company.name": "Unternehmen",
+  "nodeView.resource.options.estimate.name": "Angebot",
+  "nodeView.resource.options.invoice.name": "Rechnung",
+  "nodeView.resource.options.project.name": "Projekt",
+  "nodeView.resource.options.proposition.name": "Ware oder Dienstleistung",
+  "nodeView.resource.options.task.name": "Aufgabe",
+  "nodeView.resource.options.timeEntry.name": "Zeiteintrag",
+  "nodeView.resource.options.voucher.name": "Beleg",
+  "nodeView.mode.displayName": "Auslösen bei",
+  "nodeView.mode.options.created.name": "Neue Datensätze",
+  "nodeView.mode.options.created.description": "Datensätze mit einer höheren ID als die höchste bisher gesehene",
+  "nodeView.mode.options.updated.name": "Neue und geänderte Datensätze",
+  "nodeView.mode.options.updated.description": "Datensätze, deren updated_at neuer ist als das neueste bisher gesehene",
+  "nodeView.createdOnlyNotice.displayName": "Rechnungen, Angebote und Belege führen in der API keinen Änderungszeitstempel, deshalb sieht dieser Trigger nur neue Datensätze. Eine Änderung an einem vorhandenen Datensatz ist nicht erkennbar."
+}

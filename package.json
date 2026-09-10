@@ -31,14 +31,15 @@
   "main": "index.js",
   "scripts": {
     "generate": "node tools/generate-descriptions.mjs",
-    "build": "n8n-node build",
+    "build": "n8n-node build && node tools/copy-translations.mjs",
     "dev": "n8n-node dev",
     "lint": "n8n-node lint",
     "lint:fix": "n8n-node lint --fix",
     "release": "n8n-node release",
     "prepublishOnly": "n8n-node prerelease",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "translations": "node tools/generate-translations.mjs"
   },
   "files": [
     "dist"

@@ -123,18 +123,50 @@ this node:
 - Filters are per endpoint and limited — mostly company, project and a date range. There is no
   full-text search.
 
+## Language
+
+The interface is English, as n8n requires of a community node. A German instance — one started
+with `N8N_DEFAULT_LOCALE=de` — gets German labels instead: the package ships translation files and
+n8n reads them per node. Papierkram is a German product whose own interface is German, so this is
+not decoration; the German follows the names the API specification itself gives its resources
+(`Income::Proposition` is *Ware oder Dienstleistung*, `Banking::Transaction` is *Kontoumsatz*).
+
+```bash
+npm run translations   # refresh the key list from the built nodes
+```
+
+Three things about the mechanism are worth knowing before touching it. The file name is the
+**whole node type**, package included — `n8n-nodes-papierkram.papierkram.json` — because n8n
+strips only its own `n8n-nodes-base.` prefix. `n8n-node build` copies only images and `__schema__`,
+so `tools/copy-translations.mjs` puts the files into `dist`; without it everything builds,
+publishes and installs, and a German instance silently shows English.
+
+And **some keys are shared by several resources**. n8n keys an option by parameter name and option
+value alone — `operation` plus `get` — while every resource declares its own `operation` property,
+so one entry carries the text of all fifteen and the German written there is shown for each of
+them. English does not show this: with no translation n8n uses each property's own text. The
+generator lists such keys at the end of a run; their German has to be true for every resource that
+shares it, which is why *Get* reads "Einen einzelnen Datensatz der gewählten Ressource lesen" and
+not "Eine Rechnung lesen". `npm test` checks that the files and the node descriptions have not
+drifted apart.
+
+> **Note:** n8n 2.35.5 cannot start with `N8N_DEFAULT_LOCALE` set to anything but `en` — every
+> node, including its own, fails to load. Fixed in
+> [#38281](https://github.com/n8n-io/n8n/pull/38281) but not yet in a release, so German waits for
+> the next one.
+
 ## Development
 
 ```bash
 npm install
 npm run generate   # rebuild the property descriptions from the OpenAPI document
 npm run lint
-npm test           # unit tests for the trigger's watermark and paging logic
-npm run build
+npm test           # trigger watermark and paging, plus translation drift
+npm run build      # TypeScript builds, then copies the translations
 npm run dev        # n8n with this node linked in
 ```
 
-The trigger is the only part with logic worth unit-testing, and its contract is about cost as much
+The trigger is the part with logic worth unit-testing, and its contract is about cost as much
 as correctness — a poll that finds nothing must not spend a page of API credits. `test/` drives it
 through a fake `IPollFunctions` that counts requests, so those assertions are possible at all.
 
