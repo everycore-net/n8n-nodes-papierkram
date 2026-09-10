@@ -1,10 +1,15 @@
-import { readFileSync, existsSync } from 'node:fs';
-import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import type { INodeProperties, INodeTypeDescription } from 'n8n-workflow';
 
 import { Papierkram } from '../nodes/Papierkram/Papierkram.node';
 import { PapierkramTrigger } from '../nodes/PapierkramTrigger/PapierkramTrigger.node';
+
+// Imported rather than read from disk: the cloud-compatibility lint forbids
+// node:fs, node:path and __dirname anywhere in the package, tests included. The
+// import path is itself part of what is being checked - n8n looks the file up
+// under exactly this name, so a rename breaks the test at load time.
+import papierkramDe from '../nodes/Papierkram/translations/de/n8n-nodes-papierkram.papierkram.json';
+import papierkramTriggerDe from '../nodes/PapierkramTrigger/translations/de/n8n-nodes-papierkram.papierkramTrigger.json';
 
 /**
  * A translation cannot fail loudly. A missing key falls back to English, a stale
@@ -17,7 +22,6 @@ import { PapierkramTrigger } from '../nodes/PapierkramTrigger/PapierkramTrigger.
  * key a user can see has one, and that none is left over.
  */
 
-const LOCALE = 'de';
 const PACKAGE = 'n8n-nodes-papierkram';
 
 /** The dotted keys n8n builds for a node's visible text. */
@@ -49,36 +53,39 @@ function keysOf(properties: INodeProperties[] | undefined, prefix = 'nodeView'):
 	return keys;
 }
 
-const nodes: Array<[string, INodeTypeDescription]> = [
-	['Papierkram', new Papierkram().description],
-	['PapierkramTrigger', new PapierkramTrigger().description],
+interface Case {
+	fileName: string;
+	translation: Record<string, unknown>;
+	description: INodeTypeDescription;
+}
+
+const cases: Case[] = [
+	{
+		fileName: 'n8n-nodes-papierkram.papierkram.json',
+		translation: papierkramDe,
+		description: new Papierkram().description,
+	},
+	{
+		fileName: 'n8n-nodes-papierkram.papierkramTrigger.json',
+		translation: papierkramTriggerDe,
+		description: new PapierkramTrigger().description,
+	},
 ];
 
-describe.each(nodes)('%s German translation', (dir, description) => {
-	const file = join(
-		__dirname,
-		'..',
-		'nodes',
-		dir,
-		'translations',
-		LOCALE,
-		`${PACKAGE}.${description.name}.json`,
-	);
-
-	it('exists under the name n8n looks for', () => {
+describe.each(cases)('German translation of $fileName', ({ fileName, translation, description }) => {
+	it('is named after the whole node type', () => {
 		// n8n strips only its own `n8n-nodes-base.` prefix, so a community node's
-		// file is named after the whole type: package and node.
-		expect(existsSync(file), `expected ${file}`).toBe(true);
+		// file carries the package name as well.
+		expect(fileName).toBe(`${PACKAGE}.${description.name}.json`);
 	});
 
 	it('translates the node itself', () => {
-		const translation = JSON.parse(readFileSync(file, 'utf8'));
-		expect(translation.header?.displayName).toBeTruthy();
-		expect(translation.header?.description).toBeTruthy();
+		const header = translation.header as { displayName?: string; description?: string } | undefined;
+		expect(header?.displayName).toBeTruthy();
+		expect(header?.description).toBeTruthy();
 	});
 
 	it('covers every key the node shows and no others', () => {
-		const translation = JSON.parse(readFileSync(file, 'utf8'));
 		const wanted = new Set(keysOf(description.properties));
 		const have = new Set(Object.keys(translation).filter((key) => key !== 'header'));
 
@@ -90,7 +97,6 @@ describe.each(nodes)('%s German translation', (dir, description) => {
 	});
 
 	it('has no empty translation', () => {
-		const translation = JSON.parse(readFileSync(file, 'utf8'));
 		const empty = Object.entries(translation)
 			.filter(([key]) => key !== 'header')
 			.filter(([, value]) => typeof value !== 'string' || value.trim() === '')
