@@ -1,0 +1,45 @@
+# Runs the community scan against an already published version.
+#
+# The release workflow scans what it just published, but that check cannot be
+# repeated without republishing, and it cannot be run at all against a version
+# released before the check worked. This can, and it needs nothing but a version
+# number.
+#
+# It does not run on Windows: the scanner extracts the attested source through
+# tar with a path from os.tmpdir(), and a Windows temp path comes out mangled
+# ("Cannot open: No such file or directory") - which looks exactly like a
+# missing source repository. Hence a workflow rather than a local command.
+name: Scan
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to scan, e.g. 0.2.1'
+        required: true
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Read the package name
+        id: package
+        run: echo "name=$(node -p "require('./package.json').name")" >> "$GITHUB_OUTPUT"
+
+      # The scanner prints its verdict and exits 0 either way, so the exit code
+      # says nothing and the output has to be read.
+      - name: Scan
+        run: |
+          set -o pipefail
+          npx @n8n/scan-community-package "${{ steps.package.outputs.name }}@${{ inputs.version }}" 2>&1 | tee scan.log
+          if grep -q '❌' scan.log; then
+            echo "::error::the community scan reported a failure"
+            exit 1
+          fi

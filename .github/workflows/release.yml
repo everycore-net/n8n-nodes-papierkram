@@ -76,9 +76,37 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           RELEASE_MODE: 'true'
 
+      # npm answers the publish before the version is readable: "your package is
+      # being processed and may take a few minutes to become available". The
+      # scanner below resolves by name from the registry, so without this wait it
+      # reliably reports "No package metadata found" for the version that was
+      # just published - which is a race, not a finding.
+      - name: Wait for the registry to serve the new version
+        run: |
+          for i in $(seq 1 40); do
+            if curl -fsS -o /dev/null "https://registry.npmjs.org/${{ steps.package.outputs.name }}/${{ steps.package.outputs.version }}"; then
+              echo "visible after $((i * 15))s"
+              exit 0
+            fi
+            sleep 15
+          done
+          echo "${{ steps.package.outputs.version }} did not appear on the registry within 10 minutes"
+          exit 1
+
       # The scanner resolves a package by name from the registry, so it cannot
-      # look at a tarball and cannot run before the publish - it would 404 and
-      # take the release with it. It is a verification of what went out, which is
-      # why a failure here means deprecating the version rather than retrying.
+      # look at a tarball and cannot run before the publish. It is a verification
+      # of what went out, which is why a failure here means deprecating the
+      # version rather than retrying.
+      #
+      # It prints its verdict and exits 0 either way, so the step has to read the
+      # output to fail. Taking the exit code at face value cost the Sage package
+      # one release: 0.1.1 went out with the scan reporting a failure under a
+      # green tick, and 0.2.1 here was published through the same blind gate.
       - name: Check the published package against the community rules
-        run: npx @n8n/scan-community-package "${{ steps.package.outputs.name }}@${{ steps.package.outputs.version }}"
+        run: |
+          set -o pipefail
+          npx @n8n/scan-community-package "${{ steps.package.outputs.name }}@${{ steps.package.outputs.version }}" 2>&1 | tee scan.log
+          if grep -q '❌' scan.log; then
+            echo "::error::the community scan reported a failure"
+            exit 1
+          fi
